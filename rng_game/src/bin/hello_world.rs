@@ -1,8 +1,8 @@
-use rng_game::day_of_week;
+use chrono::{Datelike, Local};
 
 fn main() {
     let now = std::time::Instant::now();
-    let result = day_of_week().to_string();
+    let result = Local::now().weekday();
     println!(" Hello World! - Today is - {:?}", result);
     let result = now.elapsed();
     println!("Program executed in seconds: {:?}", result);
