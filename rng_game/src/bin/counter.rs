@@ -1,7 +1,7 @@
 use std::io;
 use std::{thread::sleep, time::Duration};
 fn main() {
-    println!("Hello, world! from Main");
+    let now = std::time::Instant::now();
     let mut counter = Box::new(0);
     'outer: loop {
         for _i in [0..1000000] {
@@ -17,4 +17,6 @@ fn main() {
             }
         }
     }
+    let result = now.elapsed();
+    println!("Program executed in seconds: {:?}", result);
 }
