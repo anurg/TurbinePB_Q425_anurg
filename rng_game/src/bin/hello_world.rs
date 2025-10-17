@@ -1,3 +1,5 @@
+use rng_game::add;
 fn main() {
-    println!("Hello World!");
+    let result = add(2, 3);
+    println!("Hello World! {}", result);
 }
