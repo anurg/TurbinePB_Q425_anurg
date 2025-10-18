@@ -9,7 +9,7 @@
 use std::collections::HashMap;
 
 // A structure to store the goal details of a team.
-#[derive(Default)]
+#[derive(Default, Copy, Clone, Debug)]
 struct TeamScores {
     goals_scored: u8,
     goals_conceded: u8,
@@ -18,7 +18,7 @@ struct TeamScores {
 fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
     // The name of the team is the key and its associated struct is the value.
     let mut scores = HashMap::<&str, TeamScores>::new();
-
+    println!("{}", results);
     for line in results.lines() {
         let mut split_iterator = line.split(',');
         // NOTE: We use `unwrap` because we didn't deal with error handling yet.
@@ -31,8 +31,32 @@ fn build_scores_table(results: &str) -> HashMap<&str, TeamScores> {
         // Keep in mind that goals scored by team 1 will be the number of goals
         // conceded by team 2. Similarly, goals scored by team 2 will be the
         // number of goals conceded by team 1.
+        if scores.contains_key(&team_1_name) {
+            let mut team_1_total_score = scores.get(&team_1_name).unwrap().clone();
+            team_1_total_score.goals_scored += team_1_score;
+            team_1_total_score.goals_conceded += team_2_score;
+            scores.insert(team_1_name, team_1_total_score);
+        } else {
+            let team_1_total_score = TeamScores {
+                goals_scored: team_1_score,
+                goals_conceded: team_2_score,
+            };
+            scores.insert(team_1_name, team_1_total_score);
+        }
+        if scores.contains_key(&team_2_name) {
+            let mut team_2_total_score = scores.get(&team_2_name).unwrap().clone();
+            team_2_total_score.goals_scored += team_2_score;
+            team_2_total_score.goals_conceded += team_1_score;
+            scores.insert(team_2_name, team_2_total_score);
+        } else {
+            let team_2_total_score = TeamScores {
+                goals_scored: team_2_score,
+                goals_conceded: team_1_score,
+            };
+            scores.insert(team_2_name, team_2_total_score);
+        }
     }
-
+    println!("{:?}", scores);
     scores
 }
 
@@ -54,9 +78,11 @@ England,Spain,1,0";
     fn build_scores() {
         let scores = build_scores_table(RESULTS);
 
-        assert!(["England", "France", "Germany", "Italy", "Poland", "Spain"]
-            .into_iter()
-            .all(|team_name| scores.contains_key(team_name)));
+        assert!(
+            ["England", "France", "Germany", "Italy", "Poland", "Spain"]
+                .into_iter()
+                .all(|team_name| scores.contains_key(team_name))
+        );
     }
 
     #[test]
