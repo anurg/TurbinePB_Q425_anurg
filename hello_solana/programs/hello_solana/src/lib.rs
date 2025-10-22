@@ -31,6 +31,6 @@ pub struct Initialize<'info> {
 #[account]
 #[derive(InitSpace)]
 pub struct UserAccount {
-    #[max_len(32)]
+    #[max_len(50)]
     pub username: String,
 }
