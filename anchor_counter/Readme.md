@@ -23,3 +23,11 @@
 ![alt text](Counter.jpg)
 
 ##### Running the Code
+
+Clone the repo and change directory to anchor_counter
+
+```
+anchor build
+anchor deploy
+anchor test
+```
