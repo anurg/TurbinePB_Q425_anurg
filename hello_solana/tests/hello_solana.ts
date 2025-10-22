@@ -8,13 +8,14 @@ describe("hello_solana", () => {
   const program = anchor.workspace.helloSolana as Program<HelloSolana>;
 
   const signer = anchor.web3.Keypair.generate();
+  console.log(`Signer Key- ${signer}`);
   const user = anchor.web3.Keypair.generate();
 
   it("Is initialized!", async () => {
     // Add your test here.
     await airdrop(program.provider.connection, signer.publicKey);
     const tx = await program.methods
-      .initialize("Anurag")
+      .initialize("anurg")
       .accounts({
         signer: signer.publicKey,
         userAccount: user.publicKey,
@@ -25,7 +26,7 @@ describe("hello_solana", () => {
     console.log("Your transaction signature", tx);
   });
 });
-async function airdrop(connection: any, address: any, amount = 1000000000) {
+async function airdrop(connection: any, address: any, amount = 5000000000) {
   await connection.confirmTransaction(
     await connection.requestAirdrop(address, amount),
     "confirmed"
