@@ -1,23 +1,106 @@
-import { Connection, Keypair, PublicKey, type Commitment } from "@solana/web3.js";
-import { getAssociatedTokenAddress, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
-import {type TokenMetadata} from "@solana/spl-token-metadata";
+import {
+  Connection,
+  Keypair,
+  SystemProgram,
+  Transaction,
+  sendAndConfirmTransaction,
+} from "@solana/web3.js";
+import {
+  createInitializeMintInstruction,
+  TYPE_SIZE,
+  LENGTH_SIZE,
+  createInitializeMetadataPointerInstruction,
+  getMintLen,
+  ExtensionType,
+  TOKEN_2022_PROGRAM_ID,
+  createUpdateFieldInstruction
+} from "@solana/spl-token";
+
+import {
+  createInitializeInstruction,
+  pack,
+  type TokenMetadata,
+} from "@solana/spl-token-metadata";
 import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
 
 let keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
+const connection = new Connection("https://api.devnet.solana.com", "confirmed");
+const mint = Keypair.generate();
 
-let commitment:Commitment = "confirmed";
-let connection = new Connection("https://api.devnet.solana.com",commitment);
+const metadata: TokenMetadata = {
+  mint: mint.publicKey,
+  name: "NKB",
+  symbol: "NKB",
+  uri: "https://raw.githubusercontent.com/anurg/TurbinePB_Q425_anurg/refs/heads/main/nkb.json",
+  additionalMetadata: [["description", "Everything Crypto!"]],
+};
 
-let mint = new PublicKey("CYBGtByTwB9yG8dqFuAVyT1MTzF7Lkanj4WbFVuugGns");
-let decimals = 1_000_000;
+// Size of Mint Account with extensions
+const mintLen = getMintLen([ExtensionType.MetadataPointer]);
 
-const metadata:TokenMetadata = {
-    mint,
-    name: "NKB",
-    symbol:"NKB",
-    uri: "https://raw.githubusercontent.com/anurg/TurbinePB_Q425_anurg/refs/heads/main/nkb.json",
-    updateAuthority:keypair.publicKey,
-    additionalMetadata:[["description","Everything Crypto!"],["image", "https://www.nkbblocks.com/images/logo.png"]]
-}
+// Size of the Metadata Extension
+const metadataLen = TYPE_SIZE + LENGTH_SIZE + pack(metadata).length;
 
-console.log(`spl_metadata`);
+// Minimum lamports required for Mint Account
+const lamports = await connection.getMinimumBalanceForRentExemption(
+  mintLen + metadataLen
+);
+
+const createAccountInstruction = SystemProgram.createAccount({
+  fromPubkey: keypair.publicKey,
+  newAccountPubkey: mint.publicKey,
+  space: mintLen,
+  lamports,
+  programId: TOKEN_2022_PROGRAM_ID,
+});
+
+const initializeMetadataPointer = createInitializeMetadataPointerInstruction(
+  mint.publicKey,
+  keypair.publicKey,
+  mint.publicKey,
+  TOKEN_2022_PROGRAM_ID
+);
+
+const initializeMintInstruction = createInitializeMintInstruction(
+  mint.publicKey,
+  6,
+  keypair.publicKey,
+  null,
+  TOKEN_2022_PROGRAM_ID
+);
+
+const initializeMetadataInstruction = createInitializeInstruction({
+  programId: TOKEN_2022_PROGRAM_ID,
+  mint: mint.publicKey,
+  metadata: mint.publicKey,
+  name: metadata.name,
+  symbol: metadata.symbol,
+  uri: metadata.uri,
+  mintAuthority: keypair.publicKey,
+  updateAuthority: keypair.publicKey,
+});
+
+const updateMetadataFieldInstructions = createUpdateFieldInstruction({
+  metadata: mint.publicKey,
+  updateAuthority: keypair.publicKey,
+  programId: TOKEN_2022_PROGRAM_ID,
+  field: metadata.additionalMetadata[0][0],
+  value: metadata.additionalMetadata[0][1],
+});
+
+const transaction = new Transaction().add(
+  createAccountInstruction,
+  initializeMetadataPointer,
+  initializeMintInstruction,
+  initializeMetadataInstruction,
+  updateMetadataFieldInstructions
+);
+
+const signature = await sendAndConfirmTransaction(connection, transaction, [
+  keypair,
+  mint,
+]);
+console.log(`Mint Address: ${mint.publicKey}`);
+console.log(
+  `Mint created! Check out your TX here: https://explorer.solana.com/tx/${signature}?cluster=devnet`
+);

@@ -1,5 +1,5 @@
 import { Keypair,Connection, type Commitment } from "@solana/web3.js";
-import {createMint} from "@solana/spl-token";
+import {createMint, createMintToInstruction} from "@solana/spl-token";
 import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
 
 let arr = new Uint8Array(wallet);
