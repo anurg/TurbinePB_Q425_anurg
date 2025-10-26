@@ -1,0 +1,12 @@
+{
+    "name": "NKB",
+    "symbol": "NKB",
+    "description": "Everything Crypto!",
+    "image": "https://www.nkbblocks.com/images/logo.png",
+    "attributes": [
+        {
+            "trait_type": "Item",
+            "value": "Developer Portal"
+        }
+    ]
+}
