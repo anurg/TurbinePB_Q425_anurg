@@ -2,7 +2,7 @@
     "name": "NKB",
     "symbol": "NKB",
     "description": "Everything Crypto!",
-    "image": "https://www.nkbblocks.com/images/logo.png",
+    "image": "https://raw.githubusercontent.com/anurg/TurbinePB_Q425_anurg/refs/heads/main/nkb.json",
     "attributes": [
         {
             "trait_type": "Item",
