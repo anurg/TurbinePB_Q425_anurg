@@ -15,7 +15,7 @@ const metadata:TokenMetadata = {
     mint,
     name: "NKB",
     symbol:"NKB",
-    uri: "https://www.nkbblocks.com/images/logo.png",
+    uri: "https://raw.githubusercontent.com/anurg/TurbinePB_Q425_anurg/refs/heads/main/nkb.json",
     updateAuthority:keypair.publicKey,
     additionalMetadata:[["description","Everything Crypto!"],["image", "https://www.nkbblocks.com/images/logo.png"]]
 }
