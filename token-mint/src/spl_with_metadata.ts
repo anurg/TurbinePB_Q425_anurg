@@ -2,7 +2,7 @@ import { Connection, Keypair, sendAndConfirmRawTransaction, SystemProgram, Trans
 import { ExtensionType, getMintLen,TYPE_SIZE,LENGTH_SIZE, getMinimumBalanceForRentExemptAccount, TOKEN_2022_PROGRAM_ID, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, updateMetadataPointerData, createUpdateMetadataPointerInstruction } from "@solana/spl-token";
 import {createInitializeInstruction, createUpdateFieldInstruction, pack, type TokenMetadata} from "@solana/spl-token-metadata";
 
-import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
+import wallet from "/home/nkbblocks/.config/solana/id.json" with {type:"json"};
 // Importing Wallet from local Solana config
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
