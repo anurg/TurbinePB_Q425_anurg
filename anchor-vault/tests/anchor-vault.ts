@@ -76,7 +76,50 @@ describe("anchor-vault", () => {
       .rpc();
     console.log("Your transaction signature", tx);
   });
+  it("Alice deposits multiple times in her Vault!", async () => {
+    const tx = await program.methods
+      .deposit(new anchor.BN(1000_000_000))
+      .accounts({
+        user: alice.publicKey,
+      })
+      .signers([alice])
+      .rpc();
+    console.log("Your transaction signature", tx);
+    const tx1 = await program.methods
+      .deposit(new anchor.BN(1000_000_000))
+      .accounts({
+        user: alice.publicKey,
+      })
+      .signers([alice])
+      .rpc();
+    console.log("Your transaction signature", tx1);
+    const tx2 = await program.methods
+      .deposit(new anchor.BN(1000_000_000))
+      .accounts({
+        user: alice.publicKey,
+      })
+      .signers([alice])
+      .rpc();
+    console.log("Your transaction signature", tx2);
+  });
 
+  it("Alice tries to initialize Vault for Bob(Should Fail)", async () => {
+    try {
+      const tx = await program.methods
+        .initialize()
+        .accounts({
+          user: bob.publicKey,
+        })
+        .signers([alice])
+        .rpc();
+      console.log("Your transaction signature", tx);
+    } catch (error) {
+      assert.isTrue(
+        error.toString().includes("Error"),
+        "Should fail as Alice cannot initialize Vault for Bob!"
+      );
+    }
+  });
   it("Bob initialize his Vault!", async () => {
     await airdrop(provider.connection, bob.publicKey);
     const tx = await program.methods
@@ -139,10 +182,9 @@ describe("anchor-vault", () => {
 
 // Test Cases for Vault
 // 1. Vault is initialized by User
-// 1.1 - Cannot initialize Vault for Someone else
-// 2. User deposits the amount in Vault.
-// 3. User can deposit multiple times in Vault
-// 4. User can  deposit in Other's vault.
+// 2. Cannot initialize Vault for Someone else
+// 3. User deposits the amount in Vault.
+// 4. User cannot  deposit in Other's vault.
 // 5. User can withdraw the amount
 // 6. User can not withdrawa more than the Vault amount - Rent
 // 6.1- User cannot withdraw from Other's Vault.
