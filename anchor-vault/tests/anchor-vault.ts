@@ -1,6 +1,5 @@
 import * as anchor from "@coral-xyz/anchor";
-import { Program } from "@coral-xyz/anchor";
-import {Keypair} from "@solana/web3.js";
+import { Program  } from "@coral-xyz/anchor";
 import { AnchorVault } from "../target/types/anchor_vault";
 
 describe("anchor-vault", () => {
@@ -9,17 +8,81 @@ describe("anchor-vault", () => {
   anchor.setProvider(provider);
 
   const program = anchor.workspace.anchorVault as Program<AnchorVault>;
-  let keypair = Keypair.generate();
-  it("Is initialized!", async () => {
-    // Add your test here.
-    
+  let alice = anchor.web3.Keypair.generate();
+  const bob = anchor.web3.Keypair.generate();
+  const jeff = anchor.web3.Keypair.generate();
+  
+  // PDA function
+function getVaultStatePDA(vaultAuthority: anchor.web3.PublicKey): anchor.web3.PublicKey  {
+    const [pda , bump] = anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("state"),vaultAuthority.toBuffer()],program.programId);
+    return pda;
+  }
 
+  function getVaultPDA(vaultAuthority: anchor.web3.PublicKey): anchor.web3.PublicKey  {
+    const [pda , bump] = anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("vault"),vaultAuthority.toBuffer()],program.programId);
+    return pda;
+  }
+
+  const aliceVaultStatePDA = getVaultStatePDA(alice.publicKey);
+  const aliceVaultPDA = getVaultPDA(aliceVaultStatePDA);
+
+  const bobVaultStatePDA = getVaultStatePDA(bob.publicKey);
+  const bobVaultPDA = getVaultPDA(bobVaultStatePDA);
+
+  const jeffVaultStatePDA = getVaultStatePDA(jeff.publicKey);
+  const jeffVaultPDA = getVaultPDA(jeffVaultStatePDA);
+
+
+  // airdrop function
+  async function airdrop(connection:any, address:anchor.web3.PublicKey, amount = 50 * anchor.web3.LAMPORTS_PER_SOL  ) {
+  await connection.confirmTransaction(await connection.requestAirdrop(address,amount), "confirmed");
+}
+  it("Alice initialize her Vault!", async () => {
+    await airdrop(provider.connection,alice.publicKey);
     const tx = await program.methods.initialize().accounts({
-      user: keypair.publicKey
-    }).signers([keypair]).rpc();
+      user: alice.publicKey
+    }).signers([alice]).rpc();
     console.log("Your transaction signature", tx);
   });
+
+  it("Alice deposits in her Vault!", async () => {
+     const tx = await program.methods.deposit(new anchor.BN(1000_000_000)).accounts({
+      user: alice.publicKey,  
+    }).signers([alice]).rpc();
+    console.log("Your transaction signature", tx);
+  });
+
+  it("Bob initialize his Vault!", async () => {
+    await airdrop(provider.connection,bob.publicKey);
+    const tx = await program.methods.initialize().accounts({
+      user: bob.publicKey
+    }).signers([bob]).rpc();
+    console.log("Your transaction signature", tx);
+  });
+
+  // it("Alice deposits in Bob's Vault!(Should Fail)", async () => {
+  //   await airdrop(provider.connection,bob.publicKey);
+  //   const tx = await program.methods.deposit(new anchor.BN(1_000_000_00)).accounts({
+  //     user: bob.publicKey,
+  //   }).signers([alice]).rpc();
+  //   console.log("Your transaction signature", tx);
+  // });
+  it("Alice withdraws from her Vault!", async () => {
+     const tx = await program.methods.withdraw(new anchor.BN(1000)).accounts({
+      user: alice.publicKey,  
+    }).signers([alice]).rpc();
+    console.log("Your transaction signature", tx);
+  });
+
+   it("Alice try to withdraw from Bob's Vault!", async () => {
+     const tx = await program.methods.withdraw(new anchor.BN(10)).accounts({
+      user: bob.publicKey,  
+    }).signers([alice]).rpc();
+    console.log("Your transaction signature", tx);
+  });
+
 });
+
 
 // Test Cases for Vault
 // 1. Vault is initialized by User
@@ -32,4 +95,3 @@ describe("anchor-vault", () => {
 // 6.1- User cannot withdraw from Other's Vault.
 // 7. User can close the Valut and get the rent back.
 // 8. User can close his Vault only.
-// 9. 
