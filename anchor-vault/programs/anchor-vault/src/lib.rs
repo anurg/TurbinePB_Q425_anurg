@@ -28,4 +28,7 @@ pub mod anchor_vault {
         withdraw::handler(ctx, amount)
     }
     // Implement close
+    pub fn close(ctx: Context<Close>) -> Result<()> {
+        close::handler(ctx)
+    }
 }
