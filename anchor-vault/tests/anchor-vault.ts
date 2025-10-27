@@ -56,6 +56,11 @@ describe("anchor-vault", () => {
   }
   it("Alice initialize her Vault!", async () => {
     await airdrop(provider.connection, alice.publicKey);
+    console.log(
+      `Alice Initial Balance after Airdrop: ${await provider.connection.getBalance(
+        alice.publicKey
+      )};`
+    );
     const tx = await program.methods
       .initialize()
       .accounts({
@@ -75,6 +80,11 @@ describe("anchor-vault", () => {
       .signers([alice])
       .rpc();
     console.log("Your transaction signature", tx);
+    console.log(
+      `Alice Balance after First Deposit: ${await provider.connection.getBalance(
+        alice.publicKey
+      )};`
+    );
   });
   it("Alice deposits multiple times in her Vault!", async () => {
     const tx = await program.methods
@@ -101,6 +111,11 @@ describe("anchor-vault", () => {
       .signers([alice])
       .rpc();
     console.log("Your transaction signature", tx2);
+    console.log(
+      `Alice Balance after Multiple Deposits: ${await provider.connection.getBalance(
+        alice.publicKey
+      )};`
+    );
   });
 
   it("Alice tries to initialize Vault for Bob(Should Fail)", async () => {
@@ -152,13 +167,18 @@ describe("anchor-vault", () => {
 
   it("Alice withdraws from her Vault!", async () => {
     const tx = await program.methods
-      .withdraw(new anchor.BN(1000))
+      .withdraw(new anchor.BN(1000_000_000))
       .accounts({
         user: alice.publicKey,
       })
       .signers([alice])
       .rpc();
     console.log("Your transaction signature", tx);
+    console.log(
+      `Alice Balance after First Withdrawal: ${await provider.connection.getBalance(
+        alice.publicKey
+      )};`
+    );
   });
 
   it("Alice try to withdraw from Bob's Vault!(Should fail)", async () => {
@@ -175,6 +195,38 @@ describe("anchor-vault", () => {
       assert.isTrue(
         error.toString().includes("Error"),
         "Should fail as only Vault owner can withdraw from Vault!"
+      );
+    }
+  });
+  it("Alice closed her Vault!", async () => {
+    const tx = await program.methods
+      .close()
+      .accounts({
+        user: alice.publicKey,
+      })
+      .signers([alice])
+      .rpc();
+    console.log("Your transaction signature", tx);
+    console.log(
+      `Alice Balance after Vault Closure: ${await provider.connection.getBalance(
+        alice.publicKey
+      )};`
+    );
+  });
+  it("Alice try to Close  Bob's Vault!(Should fail)", async () => {
+    try {
+      const tx = await program.methods
+        .close()
+        .accounts({
+          user: bob.publicKey,
+        })
+        .signers([alice])
+        .rpc();
+      console.log("Your transaction signature", tx);
+    } catch (error) {
+      assert.isTrue(
+        error.toString().includes("Error"),
+        "Should fail as only Vault owner can close the Vault!"
       );
     }
   });
