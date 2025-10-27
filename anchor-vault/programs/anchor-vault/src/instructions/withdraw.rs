@@ -24,10 +24,11 @@ impl<'info> Withdraw<'info> {
     pub fn withdraw(&mut self, amount: u64) -> Result<()> {
         let rent_exempt =
             Rent::get()?.minimum_balance(self.vault_state.to_account_info().data_len());
-        require!(
-            amount <= self.vault.lamports().checked_sub(rent_exempt).unwrap(),
-            ErrorCode::VaultAmountError
-        );
+        let min_amount = match self.vault.lamports().checked_sub(rent_exempt) {
+            Some(n) => n,
+            None => 0,
+        };
+        require!(amount <= min_amount, ErrorCode::VaultAmountError);
         let cpi_program = self.system_program.to_account_info();
         let cpi_accounts = Transfer {
             from: self.vault.to_account_info(),
