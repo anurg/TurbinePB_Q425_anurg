@@ -12,7 +12,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("5cQpFj87tz8PSYP5EKgXqot8V6u67K5KBfXUZCSMq9UM");
+declare_id!("FsaspkQ79at6noNT8So8DSDVePAWPdQQET1Aq92zAzND");
 
 #[program]
 pub mod anchor_vault {
