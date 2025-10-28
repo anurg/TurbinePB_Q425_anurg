@@ -24,7 +24,7 @@ pub struct Close<'info> {
 
 impl<'info> Close<'info> {
     pub fn close(&mut self) -> Result<()> {
-        // transfer all lamports from Vault to User
+        // transfer all lamports from Vault to User. This is closed when balance is zero.
         // close the vault_state account
         let cpi_program = self.system_program.to_account_info();
         let cpi_accounts = Transfer {
