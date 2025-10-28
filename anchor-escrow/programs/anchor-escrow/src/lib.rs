@@ -1,13 +1,12 @@
+#![allow(unexpected_cfgs, deprecated)]
+use anchor_lang::prelude::*;
 pub mod constants;
 pub mod error;
 pub mod instructions;
 pub mod state;
 
-use anchor_lang::prelude::*;
-
-pub use constants::*;
-pub use instructions::*;
-pub use state::*;
+use instructions::*;
+use state::*;
 
 declare_id!("CwreJSTjDggV8AFxQNNgctMipM5EeEwS7ZzAEsYQGAmC");
 
@@ -15,7 +14,8 @@ declare_id!("CwreJSTjDggV8AFxQNNgctMipM5EeEwS7ZzAEsYQGAmC");
 pub mod anchor_escrow {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn initialize(ctx: Context<Make>, seed: u64, deposit: u64, recieve: u64) -> Result<()> {
+        ctx.accounts.init_escrow(seed, recieve, &ctx.bumps)?;
+        ctx.accounts.deposit(deposit)
     }
 }
