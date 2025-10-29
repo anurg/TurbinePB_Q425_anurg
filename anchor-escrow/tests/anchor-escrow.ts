@@ -1,13 +1,15 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import {createMint,mintTo, 
-  TOKEN_PROGRAM_ID, 
-  ASSOCIATED_TOKEN_PROGRAM_ID, 
-  getAssociatedTokenAddressSync, 
+import {
+  createMint,
+  mintTo,
+  TOKEN_PROGRAM_ID,
+  ASSOCIATED_TOKEN_PROGRAM_ID,
+  getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
   getAccount,
-  getMint
-} from "@solana/spl-token"
+  getMint,
+} from "@solana/spl-token";
 import { AnchorEscrow } from "../target/types/anchor_escrow";
 
 describe("anchor-escrow", () => {
@@ -18,129 +20,177 @@ describe("anchor-escrow", () => {
   const program = anchor.workspace.anchorEscrow as Program<AnchorEscrow>;
 
   //  ------------------- //
-//  Steps to testing-
-// 1. create Maker & Taker wallet
-// 2. Mint Token a & b
-// 3. Airdrop lamports to Maker, Taker wallets
-// 4. genreate ATAs-  maker ATA a , maker ATA b, taker ATA a, Taker ATA b address
-// 5. Mint Tokens to ATA- mintTo 
-// 6. generate escrow PDA
-// 6. generate Vault Token Account
-// 7. 
+  //  Steps to testing-
+  // 1. create Maker & Taker wallet
+  // 2. Mint Token a & b
+  // 3. Airdrop lamports to Maker, Taker wallets
+  // 4. genreate ATAs-  maker ATA a , maker ATA b, taker ATA a, Taker ATA b address
+  // 5. Mint Tokens to ATA- mintTo
+  // 6. generate escrow PDA
+  // 6. generate Vault Token Account
+  // 7.
   //----------------------//
   const maker = provider.wallet.publicKey;
   const taker = anchor.web3.Keypair.generate();
-  let mint_a:anchor.web3.PublicKey;
-  let mint_b:anchor.web3.PublicKey;
-  let maker_ata_a:anchor.web3.PublicKey;
-  let taker_ata_b:anchor.web3.PublicKey;
+  let mint_a: anchor.web3.PublicKey;
+  let mint_b: anchor.web3.PublicKey;
+  let maker_ata_a: anchor.web3.PublicKey;
+  let taker_ata_b: anchor.web3.PublicKey;
   const seed = new anchor.BN(3113);
   let escrowPDA: anchor.web3.PublicKey;
-  let escrowBump:number;
-  let vault:anchor.web3.PublicKey;
-  before(async ()=>{
-    console.log(`Balance of Maker- ${await provider.connection.getBalance(maker)}`);
-    await provider.connection.confirmTransaction(await provider.connection.requestAirdrop(taker.publicKey,1 * anchor.web3.LAMPORTS_PER_SOL));
-    console.log(`Balance of Taker- ${await provider.connection.getBalance(taker.publicKey)}`);
+  let escrowBump: number;
+  let vault: anchor.web3.PublicKey;
+  before(async () => {
+    console.log(
+      `Balance of Maker- ${await provider.connection.getBalance(maker)}`
+    );
+    await provider.connection.confirmTransaction(
+      await provider.connection.requestAirdrop(
+        taker.publicKey,
+        1 * anchor.web3.LAMPORTS_PER_SOL
+      )
+    );
+    console.log(
+      `Balance of Taker- ${await provider.connection.getBalance(
+        taker.publicKey
+      )}`
+    );
 
     // minta , mintb ------------------------------------------
-     mint_a = await createMint(provider.connection,provider.wallet.payer,maker,null,2 );
+    mint_a = await createMint(
+      provider.connection,
+      provider.wallet.payer,
+      maker,
+      null,
+      2
+    );
     console.log(`mint_a ${mint_a}`);
-     mint_b = await createMint(provider.connection,provider.wallet.payer,taker.publicKey,null,3 );
+    mint_b = await createMint(
+      provider.connection,
+      provider.wallet.payer,
+      taker.publicKey,
+      null,
+      3
+    );
     console.log(`mint_b ${mint_b}`);
     // -------------------------------------------------------------
 
     //Create maker_ata_a and mint tokens to it ----------------------
-     maker_ata_a = getAssociatedTokenAddressSync(mint_a,maker);
-    const maker_ata_a_tx = new anchor.web3.Transaction().add(await createAssociatedTokenAccountInstruction(
-      provider.wallet.publicKey,maker_ata_a,maker,mint_a)
+    maker_ata_a = getAssociatedTokenAddressSync(mint_a, maker);
+    const maker_ata_a_tx = new anchor.web3.Transaction().add(
+      await createAssociatedTokenAccountInstruction(
+        provider.wallet.publicKey,
+        maker_ata_a,
+        maker,
+        mint_a
+      )
     );
     await provider.sendAndConfirm(maker_ata_a_tx);
-    await mintTo(provider.connection,provider.wallet.payer,mint_a,maker_ata_a,maker, 10000000);
-    let maker_a_bal= await getTokenBalanceSpl(provider.connection, maker_ata_a).catch(err => console.log(err));
-    console.log(`Maker ATA a Balance - ${maker_a_bal}`); 
+    await mintTo(
+      provider.connection,
+      provider.wallet.payer,
+      mint_a,
+      maker_ata_a,
+      maker,
+      10000000
+    );
+    let maker_a_bal = await getTokenBalanceSpl(
+      provider.connection,
+      maker_ata_a
+    ).catch((err) => console.log(err));
+    console.log(`Maker ATA a Balance - ${maker_a_bal}`);
     //----------------------------------------------------------------
 
-   //Create taker_ata_b and mint tokens to it ----------------------
-     taker_ata_b = getAssociatedTokenAddressSync(mint_b,taker.publicKey);
-    const taker_ata_b_tx = new anchor.web3.Transaction().add(await createAssociatedTokenAccountInstruction(
-      provider.wallet.publicKey,taker_ata_b,taker.publicKey,mint_b)
+    //Create taker_ata_b and mint tokens to it ----------------------
+    taker_ata_b = getAssociatedTokenAddressSync(mint_b, taker.publicKey);
+    const taker_ata_b_tx = new anchor.web3.Transaction().add(
+      await createAssociatedTokenAccountInstruction(
+        provider.wallet.publicKey,
+        taker_ata_b,
+        taker.publicKey,
+        mint_b
+      )
     );
     await provider.sendAndConfirm(taker_ata_b_tx);
-    await mintTo(provider.connection,provider.wallet.payer,mint_b,taker_ata_b,taker, 50000000);
-    let taker_b_bal= await getTokenBalanceSpl(provider.connection, taker_ata_b).catch(err => console.log(err));
-    console.log(`Taker ATA b Balance - ${taker_b_bal}`); 
+    await mintTo(
+      provider.connection,
+      provider.wallet.payer,
+      mint_b,
+      taker_ata_b,
+      taker,
+      50000000
+    );
+    let taker_b_bal = await getTokenBalanceSpl(
+      provider.connection,
+      taker_ata_b
+    ).catch((err) => console.log(err));
+    console.log(`Taker ATA b Balance - ${taker_b_bal}`);
     //----------------------------------------------------------------
     // Create seed, PDA, Vault Account
-    
-     [escrowPDA,escrowBump]=anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("escrow"),maker.toBuffer(),seed.toArrayLike(Buffer,"le",8)
-    ],program.programId);
-     vault = getAssociatedTokenAddressSync(mint_a,escrowPDA,true);
+
+    [escrowPDA, escrowBump] = anchor.web3.PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("escrow"),
+        maker.toBuffer(),
+        seed.toArrayLike(Buffer, "le", 8),
+      ],
+      program.programId
+    );
+    vault = getAssociatedTokenAddressSync(mint_a, escrowPDA, true);
   });
 
   it("Make an Offer!", async () => {
-   // Add your test here.
-    const tx = await program.methods.make(seed, new anchor.BN(2000),new anchor.BN(1000)
-      )
+    const tx = await program.methods
+      .make(seed, new anchor.BN(2000), new anchor.BN(1000))
       .accounts({
-        maker:maker,
-        mintA:mint_a,
-        mintB:mint_b,
-        makerAtaA:maker_ata_a,
-        escrow:escrowPDA,
-        vault:vault,
-        associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram:TOKEN_PROGRAM_ID,
-        systemProgram:anchor.web3.SystemProgram.programId,
+        maker: maker,
+        mintA: mint_a,
+        mintB: mint_b,
+        makerAtaA: maker_ata_a,
+        escrow: escrowPDA,
+        vault: vault,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
       })
       .rpc();
     console.log("Your transaction signature", tx);
-    const vaultBalance = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
+    const vaultBalance = (
+      await provider.connection.getTokenAccountBalance(vault)
+    ).value.amount;
     console.log(`The amount in Vault is ${vaultBalance}`);
-    //  const tx1 = await program.methods.refund()
-    //   .accounts({
-    //     maker:maker,
-    //     mintA:mint_a,
-    //     makerAtaA:maker_ata_a,
-    //     escrow:escrowPDA,
-    //     vault:vault,
-    //     associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,
-    //     tokenProgram:TOKEN_PROGRAM_ID,
-    //     systemProgram:anchor.web3.SystemProgram.programId,
-    //   })
-    //   .rpc();
-    // console.log("Your transaction signature", tx1);
-    // const vaultBalance1 = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
-    // console.log(`The amount in Vault is ${vaultBalance1}`);
+
+    const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
+      .value.amount;
+    console.log(`The amount in Maker ATA -a after deposit is ${ATAA}`);
   });
-  //   it("Refund Offer!", async () => {
-  //  // Add your test here.
-  //   const tx = await program.methods.refund(seed)
-  //     .accounts({
-  //       maker:maker,
-  //       mintA:mint_a,
-  //       mintB:mint_b,
-  //       makerAtaA:maker_ata_a,
-  //       escrow:escrowPDA,
-  //       vault:vault,
-  //       associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,
-  //       tokenProgram:TOKEN_PROGRAM_ID,
-  //       systemProgram:anchor.web3.SystemProgram.programId,
-  //     })
-  //     .rpc();
-  //   console.log("Your transaction signature", tx);
-  //   const vaultBalance = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
-  //   console.log(`The amount in Vault is ${vaultBalance}`);
-  // });
+  it("Refund Offer!", async () => {
+    const tx = await program.methods
+      .refund()
+      .accounts({
+        maker: maker,
+        mintA: mint_a,
+        makerAtaA: maker_ata_a,
+        escrow: escrowPDA,
+        vault: vault,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+    console.log("Your transaction signature", tx);
+    const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
+      .value.amount;
+    console.log(`The amount in Maker ATA-a after refund is ${ATAA}`);
+  });
 });
 // ----------Helper Functions
 // -------get SPL Token Balance
 async function getTokenBalanceSpl(connection, tokenAccount) {
-    const info = await getAccount(connection, tokenAccount);
-    const amount = Number(info.amount);
-    const mint = await getMint(connection, info.mint);
-    const balance = amount / (10 ** mint.decimals);
-    // console.log('Balance (using Solana-Web3.js): ', balance);
-    return balance;
+  const info = await getAccount(connection, tokenAccount);
+  const amount = Number(info.amount);
+  const mint = await getMint(connection, info.mint);
+  const balance = amount / 10 ** mint.decimals;
+  // console.log('Balance (using Solana-Web3.js): ', balance);
+  return balance;
 }
-
