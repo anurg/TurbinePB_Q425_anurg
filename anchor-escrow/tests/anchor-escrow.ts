@@ -35,6 +35,8 @@ describe("anchor-escrow", () => {
   let mint_a: anchor.web3.PublicKey;
   let mint_b: anchor.web3.PublicKey;
   let maker_ata_a: anchor.web3.PublicKey;
+  let maker_ata_b: anchor.web3.PublicKey;
+  let taker_ata_a: anchor.web3.PublicKey;
   let taker_ata_b: anchor.web3.PublicKey;
   const seed = new anchor.BN(3113);
   let escrowPDA: anchor.web3.PublicKey;
@@ -77,6 +79,7 @@ describe("anchor-escrow", () => {
 
     //Create maker_ata_a and mint tokens to it ----------------------
     maker_ata_a = getAssociatedTokenAddressSync(mint_a, maker);
+    maker_ata_b = getAssociatedTokenAddressSync(mint_b, maker);
     const maker_ata_a_tx = new anchor.web3.Transaction().add(
       await createAssociatedTokenAccountInstruction(
         provider.wallet.publicKey,
@@ -102,6 +105,7 @@ describe("anchor-escrow", () => {
     //----------------------------------------------------------------
 
     //Create taker_ata_b and mint tokens to it ----------------------
+    taker_ata_a = getAssociatedTokenAddressSync(mint_a, taker.publicKey);
     taker_ata_b = getAssociatedTokenAddressSync(mint_b, taker.publicKey);
     const taker_ata_b_tx = new anchor.web3.Transaction().add(
       await createAssociatedTokenAccountInstruction(
@@ -160,30 +164,76 @@ describe("anchor-escrow", () => {
     ).value.amount;
     console.log(`The amount in Vault is ${vaultBalance}`);
 
-    const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
-      .value.amount;
-    console.log(`The amount in Maker ATA -a after deposit is ${ATAA}`);
+    const ATAA = (
+      await provider.connection.getTokenAccountBalance(
+        getAssociatedTokenAddressSync(mint_a, maker)
+      )
+    ).value.amount;
+    console.log(`The amount in Maker ATA -a after Offer is taken: ${ATAA}`);
   });
-  it("Refund Offer!", async () => {
+
+  // it("Refund Offer!", async () => {
+  //   const tx = await program.methods
+  //     .refund()
+  //     .accounts({
+  //       maker: maker,
+  //       mintA: mint_a,
+  //       makerAtaA: maker_ata_a,
+  //       escrow: escrowPDA,
+  //       vault: vault,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       systemProgram: anchor.web3.SystemProgram.programId,
+  //     })
+  //     .rpc();
+  //   console.log("Your transaction signature", tx);
+  //   const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
+  //     .value.amount;
+  //   console.log(`The amount in Maker ATA-a after refund is ${ATAA}`);
+  // });
+
+  it("Take Offer!", async () => {
     const tx = await program.methods
-      .refund()
-      .accounts({
+      .take()
+      .accountsStrict({
+        taker: taker.publicKey,
         maker: maker,
         mintA: mint_a,
+        mintB: mint_b,
         makerAtaA: maker_ata_a,
+        makerAtaB: maker_ata_b,
+        takerAtaA: taker_ata_a,
+        takerAtaB: taker_ata_b,
         escrow: escrowPDA,
         vault: vault,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers([taker])
       .rpc();
     console.log("Your transaction signature", tx);
-    const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
-      .value.amount;
-    console.log(`The amount in Maker ATA-a after refund is ${ATAA}`);
+    const ATAAA = (
+      await provider.connection.getTokenAccountBalance(maker_ata_a)
+    ).value.amount;
+    console.log(`The amount in Maker ATA-a after refund is ${ATAAA}`);
+
+    const ATAA = (
+      await provider.connection.getTokenAccountBalance(
+        getAssociatedTokenAddressSync(mint_a, taker.publicKey)
+      )
+    ).value.amount;
+    console.log(`The amount in Taker ATA -a after offer is taken: ${ATAA}`);
+
+    const ATAB = (
+      await provider.connection.getTokenAccountBalance(
+        getAssociatedTokenAddressSync(mint_b, maker)
+      )
+    ).value.amount;
+    console.log(`The amount in Maker ATA -b after Offer is taken: ${ATAB}`);
   });
 });
+
 // ----------Helper Functions
 // -------get SPL Token Balance
 async function getTokenBalanceSpl(connection, tokenAccount) {
