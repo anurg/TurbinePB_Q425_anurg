@@ -1,6 +1,6 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
-    associated_token::AssociatedToken, token::{TransferChecked, transfer_checked}, token_interface::{Mint, TokenAccount, TokenInterface, Transfer, transfer}
+    associated_token::AssociatedToken, token_interface::{Mint, TokenAccount, TokenInterface, transfer_checked,TransferChecked}
 };
 
 use crate::Escrow;
@@ -64,7 +64,7 @@ impl<'info> Make<'info> {
             from: self.maker_ata_a.to_account_info(),
             mint: self.mint_a.to_account_info(),
             to: self.vault.to_account_info(),
-            authority: self.token_program.to_account_info(),
+            authority: self.maker.to_account_info(),
         };
         let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
         transfer_checked(cpi_context, deposit,self.mint_a.decimals)
