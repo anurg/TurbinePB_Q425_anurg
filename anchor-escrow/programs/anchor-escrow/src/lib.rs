@@ -22,4 +22,9 @@ pub mod anchor_escrow {
     pub fn refund(ctx: Context<Refund>) -> Result<()> {
         ctx.accounts.refund_and_close()
     }
+
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.deposit()?;
+        ctx.accounts.withdraw_and_close_vault()
+    }
 }
