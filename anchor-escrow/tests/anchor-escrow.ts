@@ -44,14 +44,14 @@ describe("anchor-escrow", () => {
     console.log(`Balance of Taker- ${await provider.connection.getBalance(taker.publicKey)}`);
 
     // minta , mintb ------------------------------------------
-    let mint_a = await createMint(provider.connection,provider.wallet.payer,maker,null,2 );
+     mint_a = await createMint(provider.connection,provider.wallet.payer,maker,null,2 );
     console.log(`mint_a ${mint_a}`);
-    let mint_b = await createMint(provider.connection,provider.wallet.payer,taker.publicKey,null,3 );
+     mint_b = await createMint(provider.connection,provider.wallet.payer,taker.publicKey,null,3 );
     console.log(`mint_b ${mint_b}`);
     // -------------------------------------------------------------
 
     //Create maker_ata_a and mint tokens to it ----------------------
-    const maker_ata_a = getAssociatedTokenAddressSync(mint_a,maker);
+     maker_ata_a = getAssociatedTokenAddressSync(mint_a,maker);
     const maker_ata_a_tx = new anchor.web3.Transaction().add(await createAssociatedTokenAccountInstruction(
       provider.wallet.publicKey,maker_ata_a,maker,mint_a)
     );
@@ -62,7 +62,7 @@ describe("anchor-escrow", () => {
     //----------------------------------------------------------------
 
    //Create taker_ata_b and mint tokens to it ----------------------
-    const taker_ata_b = getAssociatedTokenAddressSync(mint_b,taker.publicKey);
+     taker_ata_b = getAssociatedTokenAddressSync(mint_b,taker.publicKey);
     const taker_ata_b_tx = new anchor.web3.Transaction().add(await createAssociatedTokenAccountInstruction(
       provider.wallet.publicKey,taker_ata_b,taker.publicKey,mint_b)
     );
@@ -73,12 +73,12 @@ describe("anchor-escrow", () => {
     //----------------------------------------------------------------
     // Create seed, PDA, Vault Account
     
-    const [escrowPDA,escrowBump]=anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("escrow"),maker.toBuffer(),seed.toArrayLike(Buffer,"le",8)
+     [escrowPDA,escrowBump]=anchor.web3.PublicKey.findProgramAddressSync([Buffer.from("escrow"),maker.toBuffer(),seed.toArrayLike(Buffer,"le",8)
     ],program.programId);
-    const vault = getAssociatedTokenAddressSync(mint_a,escrowPDA,true);
+     vault = getAssociatedTokenAddressSync(mint_a,escrowPDA,true);
   });
 
-  it("Is initialized!", async () => {
+  it("Make an Offer!", async () => {
    // Add your test here.
     const tx = await program.methods.make(seed, new anchor.BN(2000),new anchor.BN(1000)
       )
@@ -95,7 +95,43 @@ describe("anchor-escrow", () => {
       })
       .rpc();
     console.log("Your transaction signature", tx);
+    const vaultBalance = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
+    console.log(`The amount in Vault is ${vaultBalance}`);
+    //  const tx1 = await program.methods.refund()
+    //   .accounts({
+    //     maker:maker,
+    //     mintA:mint_a,
+    //     makerAtaA:maker_ata_a,
+    //     escrow:escrowPDA,
+    //     vault:vault,
+    //     associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,
+    //     tokenProgram:TOKEN_PROGRAM_ID,
+    //     systemProgram:anchor.web3.SystemProgram.programId,
+    //   })
+    //   .rpc();
+    // console.log("Your transaction signature", tx1);
+    // const vaultBalance1 = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
+    // console.log(`The amount in Vault is ${vaultBalance1}`);
   });
+  //   it("Refund Offer!", async () => {
+  //  // Add your test here.
+  //   const tx = await program.methods.refund(seed)
+  //     .accounts({
+  //       maker:maker,
+  //       mintA:mint_a,
+  //       mintB:mint_b,
+  //       makerAtaA:maker_ata_a,
+  //       escrow:escrowPDA,
+  //       vault:vault,
+  //       associatedTokenProgram:ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       tokenProgram:TOKEN_PROGRAM_ID,
+  //       systemProgram:anchor.web3.SystemProgram.programId,
+  //     })
+  //     .rpc();
+  //   console.log("Your transaction signature", tx);
+  //   const vaultBalance = (await provider.connection.getTokenAccountBalance(vault)).value.amount;
+  //   console.log(`The amount in Vault is ${vaultBalance}`);
+  // });
 });
 // ----------Helper Functions
 // -------get SPL Token Balance

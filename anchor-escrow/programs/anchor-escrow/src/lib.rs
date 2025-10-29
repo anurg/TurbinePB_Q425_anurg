@@ -18,4 +18,8 @@ pub mod anchor_escrow {
         ctx.accounts.init_escrow(seed, recieve, &ctx.bumps)?;
         ctx.accounts.deposit(deposit)
     }
+
+    pub fn refund(ctx: Context<Refund>) -> Result<()> {
+        ctx.accounts.refund_and_close()
+    }
 }
