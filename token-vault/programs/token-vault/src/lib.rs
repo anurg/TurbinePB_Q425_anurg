@@ -21,4 +21,7 @@ pub mod token_vault {
     pub fn deposit(ctx: Context<Deposit>, deposit: u64) -> Result<()> {
         ctx.accounts.deposit(deposit)
     }
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        ctx.accounts.withdraw(amount)
+    }
 }
