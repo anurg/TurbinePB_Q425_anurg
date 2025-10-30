@@ -18,4 +18,7 @@ pub mod token_vault {
     pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
         ctx.accounts.initialize_vault(&ctx.bumps)
     }
+    pub fn deposit(ctx: Context<Deposit>, deposit: u64) -> Result<()> {
+        ctx.accounts.deposit(deposit)
+    }
 }

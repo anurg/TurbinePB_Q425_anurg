@@ -38,7 +38,7 @@ describe("token-vault", () => {
       provider.wallet.payer,
       owner.publicKey,
       null,
-      2
+      0
     );
     console.log(`mint_a ${mint}`);
     //Creating Owner ATA to hold the minted Tokens
@@ -78,8 +78,7 @@ await provider.sendAndConfirm(owner_ata_tx);
     console.log(`Maker ATA a Balance - ${owner_bal}`);
 
   });
-  it("Is initialized!", async () => {
-    // Add your test here.
+  it("Token Vault is initialized!", async () => {
     const tx = await program.methods.initialize().accountsStrict(
       {
       owner:provider.wallet.publicKey,
@@ -93,6 +92,35 @@ await provider.sendAndConfirm(owner_ata_tx);
   ).rpc();
     console.log("Your transaction signature", tx);
   });
+  it("Deposit Token in Vault!", async () => {
+    const tx = await program.methods.deposit(new anchor.BN(10000)).accountsStrict(
+      {
+      owner:provider.wallet.publicKey,
+      ownerAta:owner_ata,
+      mint:mint,
+      vault,
+      vaultState:vaultStatePDA,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenProgram:TOKEN_PROGRAM_ID,
+      systemProgram:anchor.web3.SystemProgram.programId,
+    }
+  ).rpc();
+    console.log("Your transaction signature", tx);
+
+    let owner_bal = await getTokenBalanceSpl(
+      provider.connection,
+      owner_ata
+    ).catch((err) => console.log(err));
+    console.log(`Owner Token Balance - ${owner_bal}`);
+
+      let vault_bal = await getTokenBalanceSpl(
+      provider.connection,
+      vault
+    ).catch((err) => console.log(err));
+    console.log(`Vault Token Balance - ${vault_bal}`);
+  });
+  
+
 });
 
 // -------get SPL Token Balance
