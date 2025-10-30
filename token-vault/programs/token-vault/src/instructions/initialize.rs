@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
@@ -10,16 +11,7 @@ use crate::state::*;
 pub struct Initialize<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
-    #[account(mint::token_program=token_program)]
-    pub mint_a: InterfaceAccount<'info, Mint>,
-    #[account(
-        init_if_needed,
-        payer=owner,
-        associated_token::mint=mint_a,
-        associated_token::authority=owner,
-        associated_token::token_program=token_program
-    )]
-    pub owner_ata_a: InterfaceAccount<'info, TokenAccount>,
+    pub mint: InterfaceAccount<'info, Mint>,
     #[account(
         init,
         payer=owner,
@@ -31,7 +23,7 @@ pub struct Initialize<'info> {
     #[account(
         init,
         payer=owner,
-        associated_token::mint=mint_a,
+        associated_token::mint = mint,
         associated_token::authority=vault_state,
         associated_token::token_program=token_program
     )]
@@ -42,7 +34,10 @@ pub struct Initialize<'info> {
 }
 
 impl<'info> Initialize<'info> {
-    pub fn initialize_vault(&mut self) -> Result<()> {
+    pub fn initialize_vault(&mut self, bumps: &InitializeBumps) -> Result<()> {
+        self.vault_state.state_bump = bumps.vault_state;
+        self.vault_state.owner = self.owner.key();
+        self.vault_state.mint = self.mint.key();
         Ok(())
     }
 }
