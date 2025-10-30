@@ -47,7 +47,7 @@ impl<'info> Withdraw<'info> {
             from: self.vault.to_account_info(),
             to: self.owner_ata.to_account_info(),
             mint: self.mint.to_account_info(),
-            authority: self.owner.to_account_info(),
+            authority: self.vault_state.to_account_info(),
         };
         let cpi_context = CpiContext::new_with_signer(
             self.token_program.to_account_info(),
