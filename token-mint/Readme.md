@@ -50,6 +50,6 @@ npx ts-node src/spl_with_metadata.ts
 This will output the generated Token & Transaction Signature
 
 ```
-Mint created! Mint Address: 5tPPxuYuJMLwiQAsLaHTECHrdgFqHsayYh6qPKqm1HTQ
+Mint created! Mint Address: Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB
 Check out your TX here: https://explorer.solana.com/tx/2RbrPSGnnaQF2Nh42VNqsnKibaksmtuuQzsb1swFKNmRHuBRY75FJBqfWPkzxe5pSqTnwj1rYSsLfXARGhaU5daB?cluster=devnet
 ```

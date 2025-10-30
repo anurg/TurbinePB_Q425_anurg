@@ -1,8 +1,28 @@
-import { Connection, Keypair, sendAndConfirmRawTransaction, SystemProgram, Transaction, type Commitment,sendAndConfirmTransaction } from "@solana/web3.js";
-import { ExtensionType, getMintLen,TYPE_SIZE,LENGTH_SIZE, getMinimumBalanceForRentExemptAccount, TOKEN_2022_PROGRAM_ID, createInitializeMetadataPointerInstruction, createInitializeMintInstruction, updateMetadataPointerData, createUpdateMetadataPointerInstruction } from "@solana/spl-token";
-import {createInitializeInstruction, createUpdateFieldInstruction, pack, type TokenMetadata} from "@solana/spl-token-metadata";
+import { Connection, 
+    Keypair, 
+    sendAndConfirmRawTransaction, 
+    SystemProgram, 
+    Transaction, 
+    type Commitment,
+    sendAndConfirmTransaction 
+} from "@solana/web3.js";
+import { 
+    ExtensionType, 
+    getMintLen,
+    TYPE_SIZE,
+    LENGTH_SIZE, 
+    getMinimumBalanceForRentExemptAccount, 
+    TOKEN_2022_PROGRAM_ID, 
+    createInitializeMetadataPointerInstruction, 
+    createInitializeMintInstruction, 
+    updateMetadataPointerData, 
+    createUpdateMetadataPointerInstruction,
+    getOrCreateAssociatedTokenAccount,
+    mintTo
 
-import wallet from "/home/nkbblocks/.config/solana/id.json" with {type:"json"};
+} from "@solana/spl-token";
+import {createInitializeInstruction, createUpdateFieldInstruction, pack, type TokenMetadata} from "@solana/spl-token-metadata";
+import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
 // Importing Wallet from local Solana config
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
