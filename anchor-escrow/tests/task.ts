@@ -42,7 +42,7 @@ describe("anchor-escrow", () => {
   let maker_ata_b: anchor.web3.PublicKey;
   let taker_ata_a: anchor.web3.PublicKey;
   let taker_ata_b: anchor.web3.PublicKey;
-  const seed = new anchor.BN(3113);
+  const seed = new anchor.BN(3110);
   let escrowPDA: anchor.web3.PublicKey;
   let escrowBump: number;
   let vault: anchor.web3.PublicKey;
@@ -137,17 +137,45 @@ describe("anchor-escrow", () => {
     vault = getAssociatedTokenAddressSync(mint_a, escrowPDA, true);
   });
 
-  //   it("Make an Offer!", async () => {
+  it("Make an Offer!", async () => {
+    const tx = await program.methods
+      .make(
+        seed,
+        new anchor.BN(2000 * decimals),
+        new anchor.BN(1000 * decimals)
+      )
+      .accounts({
+        maker: maker,
+        mintA: mint_a,
+        mintB: mint_b,
+        makerAtaA: maker_ata_a,
+        escrow: escrowPDA,
+        vault: vault,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
+    console.log("Your transaction signature", tx);
+    const vaultBalance = (
+      await provider.connection.getTokenAccountBalance(vault)
+    ).value.amount;
+    console.log(`The amount in Vault is ${vaultBalance}`);
+
+    const ATAA = (
+      await provider.connection.getTokenAccountBalance(
+        getAssociatedTokenAddressSync(mint_a, maker)
+      )
+    ).value.amount;
+    console.log(`The amount in Maker ATA -a after Offer is taken: ${ATAA}`);
+  });
+
+  //   it("Refund Offer!", async () => {
   //     const tx = await program.methods
-  //       .make(
-  //         seed,
-  //         new anchor.BN(2000 * decimals),
-  //         new anchor.BN(1000 * decimals)
-  //       )
+  //       .refund()
   //       .accounts({
   //         maker: maker,
   //         mintA: mint_a,
-  //         mintB: mint_b,
   //         makerAtaA: maker_ata_a,
   //         escrow: escrowPDA,
   //         vault: vault,
@@ -157,38 +185,10 @@ describe("anchor-escrow", () => {
   //       })
   //       .rpc();
   //     console.log("Your transaction signature", tx);
-  //     const vaultBalance = (
-  //       await provider.connection.getTokenAccountBalance(vault)
-  //     ).value.amount;
-  //     console.log(`The amount in Vault is ${vaultBalance}`);
-
-  //     const ATAA = (
-  //       await provider.connection.getTokenAccountBalance(
-  //         getAssociatedTokenAddressSync(mint_a, maker)
-  //       )
-  //     ).value.amount;
-  //     console.log(`The amount in Maker ATA -a after Offer is taken: ${ATAA}`);
+  //     const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
+  //       .value.amount;
+  //     console.log(`The amount in Maker ATA-a after refund is ${ATAA}`);
   //   });
-
-  // it("Refund Offer!", async () => {
-  //   const tx = await program.methods
-  //     .refund()
-  //     .accounts({
-  //       maker: maker,
-  //       mintA: mint_a,
-  //       makerAtaA: maker_ata_a,
-  //       escrow: escrowPDA,
-  //       vault: vault,
-  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //       tokenProgram: TOKEN_PROGRAM_ID,
-  //       systemProgram: anchor.web3.SystemProgram.programId,
-  //     })
-  //     .rpc();
-  //   console.log("Your transaction signature", tx);
-  //   const ATAA = (await provider.connection.getTokenAccountBalance(maker_ata_a))
-  //     .value.amount;
-  //   console.log(`The amount in Maker ATA-a after refund is ${ATAA}`);
-  // });
 
   it("Take Offer!", async () => {
     const tx = await program.methods
