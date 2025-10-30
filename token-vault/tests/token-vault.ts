@@ -119,7 +119,33 @@ await provider.sendAndConfirm(owner_ata_tx);
     ).catch((err) => console.log(err));
     console.log(`Vault Token Balance - ${vault_bal}`);
   });
-  
+   it("Withdraw Some Tokens from Vault!", async () => {
+    const tx = await program.methods.withdraw(new anchor.BN(4000)).accountsStrict(
+      {
+      owner:provider.wallet.publicKey,
+      ownerAta:owner_ata,
+      mint:mint,
+      vault,
+      vaultState:vaultStatePDA,
+      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+      tokenProgram:TOKEN_PROGRAM_ID,
+      systemProgram:anchor.web3.SystemProgram.programId,
+    }
+  ).rpc();
+    console.log("Your transaction signature", tx);
+
+    let owner_bal = await getTokenBalanceSpl(
+      provider.connection,
+      owner_ata
+    ).catch((err) => console.log(err));
+    console.log(`Owner Token Balance - ${owner_bal}`);
+
+      let vault_bal = await getTokenBalanceSpl(
+      provider.connection,
+      vault
+    ).catch((err) => console.log(err));
+    console.log(`Vault Token Balance - ${vault_bal}`);
+  });
 
 });
 
