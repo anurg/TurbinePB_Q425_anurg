@@ -1,13 +1,14 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
-import {createMint, 
+import {
+  createMint,
   getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
   getAccount,
   getMint,
   mintTo,
   ASSOCIATED_TOKEN_PROGRAM_ID,
-  TOKEN_PROGRAM_ID
+  TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 import { TokenVault } from "../target/types/token_vault";
 
@@ -16,7 +17,7 @@ describe("token-vault", () => {
   let provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   let owner = provider.wallet;
-  
+
   const program = anchor.workspace.tokenVault as Program<TokenVault>;
   /*
   1. Make Anchor Provider wallet to owner.
@@ -28,47 +29,47 @@ describe("token-vault", () => {
   let owner_ata: anchor.web3.PublicKey;
   let vaultStatePDA: anchor.web3.PublicKey;
   let vaultStateBump: number;
-  let vault : anchor.web3.PublicKey;
+  let vault: anchor.web3.PublicKey;
 
-
-  before(async ()=>{
+  before(async () => {
     // Minting Token
-    mint = await createMint(
-      provider.connection,
-      provider.wallet.payer,
-      owner.publicKey,
-      null,
-      0
+    // mint = await createMint(
+    //   provider.connection,
+    //   provider.wallet.payer,
+    //   owner.publicKey,
+    //   null,
+    //   0
+    // );
+    mint = new anchor.web3.PublicKey(
+      "Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB"
     );
-    console.log(`mint_a ${mint}`);
+    console.log(`mint ${mint}`);
     //Creating Owner ATA to hold the minted Tokens
     owner_ata = getAssociatedTokenAddressSync(mint, owner.publicKey);
-    const owner_ata_tx = new anchor.web3.Transaction().add(
-      await createAssociatedTokenAccountInstruction(
-        provider.wallet.publicKey,
-        owner_ata,
-        owner.publicKey,
-        mint
-      )
-    );
-await provider.sendAndConfirm(owner_ata_tx);
-// Mint Tokens to Onwer Account
-    await mintTo(
-      provider.connection,
-      provider.wallet.payer,
-      mint,
-      owner_ata,
-      owner.publicKey,
-      10000000
-    );
+    // const owner_ata_tx = new anchor.web3.Transaction().add(
+    //   await createAssociatedTokenAccountInstruction(
+    //     provider.wallet.publicKey,
+    //     owner_ata,
+    //     owner.publicKey,
+    //     mint
+    //   )
+    // );
+    // await provider.sendAndConfirm(owner_ata_tx);
+    // // Mint Tokens to Onwer Account
+    // await mintTo(
+    //   provider.connection,
+    //   provider.wallet.payer,
+    //   mint,
+    //   owner_ata,
+    //   owner.publicKey,
+    //   10000000
+    // );
     // Create seed, PDA, Vault Account
-    [vaultStatePDA, vaultStateBump] = anchor.web3.PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("state"),
-        owner.publicKey.toBuffer(),
-      ],
-      program.programId
-    );
+    [vaultStatePDA, vaultStateBump] =
+      anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("state"), owner.publicKey.toBuffer()],
+        program.programId
+      );
     vault = getAssociatedTokenAddressSync(mint, vaultStatePDA, true);
 
     let owner_bal = await getTokenBalanceSpl(
@@ -76,35 +77,37 @@ await provider.sendAndConfirm(owner_ata_tx);
       owner_ata
     ).catch((err) => console.log(err));
     console.log(`Maker ATA a Balance - ${owner_bal}`);
-
   });
-  it("Token Vault is initialized!", async () => {
-    const tx = await program.methods.initialize().accountsStrict(
-      {
-      owner:provider.wallet.publicKey,
-      mint:mint,
-      vault,
-      vaultState:vaultStatePDA,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      tokenProgram:TOKEN_PROGRAM_ID,
-      systemProgram:anchor.web3.SystemProgram.programId,
-    }
-  ).rpc();
-    console.log("Your transaction signature", tx);
-  });
+  // it("Token Vault is initialized!", async () => {
+  //   const tx = await program.methods
+  //     .initialize()
+  //     .accountsStrict({
+  //       owner: provider.wallet.publicKey,
+  //       mint: mint,
+  //       vault,
+  //       vaultState: vaultStatePDA,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       systemProgram: anchor.web3.SystemProgram.programId,
+  //     })
+  //     .rpc();
+  //   console.log("Your transaction signature", tx);
+  // });
   it("Deposit Token in Vault!", async () => {
-    const tx = await program.methods.deposit(new anchor.BN(10000)).accountsStrict(
-      {
-      owner:provider.wallet.publicKey,
-      ownerAta:owner_ata,
-      mint:mint,
-      vault,
-      vaultState:vaultStatePDA,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      tokenProgram:TOKEN_PROGRAM_ID,
-      systemProgram:anchor.web3.SystemProgram.programId,
-    }
-  ).rpc();
+    const decimals = 1_000_000;
+    const tx = await program.methods
+      .deposit(new anchor.BN(10 * decimals))
+      .accountsStrict({
+        owner: provider.wallet.publicKey,
+        ownerAta: owner_ata,
+        mint: mint,
+        vault,
+        vaultState: vaultStatePDA,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .rpc();
     console.log("Your transaction signature", tx);
 
     let owner_bal = await getTokenBalanceSpl(
@@ -113,40 +116,39 @@ await provider.sendAndConfirm(owner_ata_tx);
     ).catch((err) => console.log(err));
     console.log(`Owner Token Balance - ${owner_bal}`);
 
-      let vault_bal = await getTokenBalanceSpl(
-      provider.connection,
-      vault
-    ).catch((err) => console.log(err));
+    let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
+      (err) => console.log(err)
+    );
     console.log(`Vault Token Balance - ${vault_bal}`);
+    console.log(`Vault Address - ${vault}`);
   });
-   it("Withdraw Some Tokens from Vault!", async () => {
-    const tx = await program.methods.withdraw(new anchor.BN(4000)).accountsStrict(
-      {
-      owner:provider.wallet.publicKey,
-      ownerAta:owner_ata,
-      mint:mint,
-      vault,
-      vaultState:vaultStatePDA,
-      associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-      tokenProgram:TOKEN_PROGRAM_ID,
-      systemProgram:anchor.web3.SystemProgram.programId,
-    }
-  ).rpc();
-    console.log("Your transaction signature", tx);
+  // it("Withdraw Some Tokens from Vault!", async () => {
+  //   const tx = await program.methods
+  //     .withdraw(new anchor.BN(4000))
+  //     .accountsStrict({
+  //       owner: provider.wallet.publicKey,
+  //       ownerAta: owner_ata,
+  //       mint: mint,
+  //       vault,
+  //       vaultState: vaultStatePDA,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       systemProgram: anchor.web3.SystemProgram.programId,
+  //     })
+  //     .rpc();
+  //   console.log("Your transaction signature", tx);
 
-    let owner_bal = await getTokenBalanceSpl(
-      provider.connection,
-      owner_ata
-    ).catch((err) => console.log(err));
-    console.log(`Owner Token Balance - ${owner_bal}`);
+  //   let owner_bal = await getTokenBalanceSpl(
+  //     provider.connection,
+  //     owner_ata
+  //   ).catch((err) => console.log(err));
+  //   console.log(`Owner Token Balance - ${owner_bal}`);
 
-      let vault_bal = await getTokenBalanceSpl(
-      provider.connection,
-      vault
-    ).catch((err) => console.log(err));
-    console.log(`Vault Token Balance - ${vault_bal}`);
-  });
-
+  //   let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
+  //     (err) => console.log(err)
+  //   );
+  //   console.log(`Vault Token Balance - ${vault_bal}`);
+  // });
 });
 
 // -------get SPL Token Balance

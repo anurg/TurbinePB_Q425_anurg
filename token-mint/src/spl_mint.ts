@@ -8,9 +8,9 @@ console.log(`Wallet Public Key- ${keypair.publicKey}`);
 let commitment:Commitment = "confirmed";
 let connection = new Connection("https://api.devnet.solana.com",commitment);
 
-let mint = new PublicKey("CYBGtByTwB9yG8dqFuAVyT1MTzF7Lkanj4WbFVuugGns");
+let mint = new PublicKey("Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB");
 let decimals = 1_000_000;
-let user = Keypair.generate();
+// let user = Keypair.generate();
 
 async function mintToUser(user:Keypair, numToken:number) {
     // create ATA
@@ -31,5 +31,5 @@ async function mintToUser(user:Keypair, numToken:number) {
         console.log(`Error Occurred!- ${e}`)
     }
 }
-await mintToUser(user,1000);
+await mintToUser(keypair,100000);
 console.log(`spl_mint`);
