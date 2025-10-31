@@ -21,7 +21,7 @@ pub struct Initialize<'info> {
     )]
     pub vault_state: Account<'info, VaultState>,
     #[account(
-        init,
+        init_if_needed,
         payer=owner,
         associated_token::mint = mint,
         associated_token::authority=vault_state,
