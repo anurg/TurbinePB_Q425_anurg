@@ -15,11 +15,11 @@ console.log(`Wallet Public Key- ${keypair.publicKey}`);
 let commitment:Commitment = "confirmed";
 let connection = new Connection("https://api.devnet.solana.com",commitment);
 
-let mint = new PublicKey("47DeD9hzZAHX9SMq99PGpvu4MGqaw4JY4oZvpGy3caB2");
+let mint = new PublicKey("EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW");
 let decimals = 1_000_000;
 // let user = Keypair.generate();
 
-async function mintToUser(user:Keypair, numToken:number) {
+async function mintToUser(user:Keypair, mint:PublicKey, numToken:number) {
    
     try {
          // create ATA
@@ -27,8 +27,8 @@ async function mintToUser(user:Keypair, numToken:number) {
             connection,
             keypair,
             mint,
-            keypair.publicKey,
-            undefined,
+            user.publicKey,
+            {commitment:"confirmed"},
             TOKEN_2022_PROGRAM_ID,
             ASSOCIATED_TOKEN_PROGRAM_ID,
             true
@@ -41,14 +41,14 @@ async function mintToUser(user:Keypair, numToken:number) {
         keypair,
         numToken * decimals,
         [],
-        undefined,
+        {commitment:"confirmed"},
         TOKEN_2022_PROGRAM_ID       
     );
-    let txnSignatureLink= `https://solscan.io/tx/${txnSignature}?cluster=devnet`
+    let txnSignatureLink= `https://explorer.solana.com/tx/${txnSignature}?cluster=devnet`
      console.log(`${numToken} Token Allocated to User- ${user.publicKey} and txnSignature is - ${txnSignatureLink}`);
     } catch (e) {
         console.log(`Error Occurred!- ${e}`)
     }
 }
-await mintToUser(keypair,100000);
+await mintToUser(keypair,mint,100000);
 
