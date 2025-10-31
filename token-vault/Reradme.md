@@ -2,15 +2,13 @@
 
 This repo contains Solana Vault example to store SPL Tokens. User can deposit & withdraw the  Tokens in vault.
 
-##### Task2
+##### Task2 (Part-2)
 - Token Created in Minting Task 
-https://explorer.solana.com/tx/Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB?cluster=devnet
+https://explorer.solana.com/address/Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB?cluster=devnet 
 
 - Vault Account
-https://explorer.solana.com/tx/GGDYwZ2ugbAXrv1h8JwRh1ccAEbKLDNw3ZX9XzbqoSLd?cluster=devnet
+https://explorer.solana.com/address/GGDYwZ2ugbAXrv1h8JwRh1ccAEbKLDNw3ZX9XzbqoSLd?cluster=devnet 
 
-- Transaction Signature- Vault creation
-Check out your TX here: https://explorer.solana.com/tx/4w5kv2CUgHmRNLA4s2U1sp4vzBKAQ3VtU9gaQS4V19znTuADWCM5pSFMq16yHbLS971DF7RZ4RAVnMhumSwJVPsp?cluster=devnet
 
 - Token Deposit in Vault txn
 https://explorer.solana.com/tx/QGx5iFANEHGEZPGc94JRK3Ui5ZBmcgnSu1TDWZJJ9YLC1KEB3i8woo4bzJwbTqCDsrFMzEGLD7sziX8FDd9qeBC?cluster=devnet
