@@ -1,5 +1,6 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+
 import {
   createMint,
   getAssociatedTokenAddressSync,
@@ -36,20 +37,8 @@ describe("token-vault", () => {
   let vault: anchor.web3.PublicKey;
   const decimals = 1_000_000;
   before(async () => {
-    // await airdrop(provider.connection, owner.publicKey);
-    // Minting Token
-    // mint = await createMint(
-    //   provider.connection,
-    //   owner.payer,
-    //   owner.publicKey,
-    //   null,
-    //   6,
-    //   undefined,
-    //   { commitment: "confirmed" },
-    //   TOKEN_2022_PROGRAM_ID
-    // );
     mint = new anchor.web3.PublicKey(
-      "DovtRR1usR4F6hMutnu7fwmTM6PY9N1L2TdAfxs9t8qG"
+      "EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW"
     );
     console.log(`mint ${mint}`);
     // Verify the mint exists
@@ -60,7 +49,9 @@ describe("token-vault", () => {
         "confirmed",
         TOKEN_2022_PROGRAM_ID
       );
-      console.log(`Mint found! Decimals: ${mintInfo.decimals}`);
+      console.log(
+        `Mint found! Decimals: ${mintInfo.decimals}- ${provider.connection.rpcEndpoint}`
+      );
     } catch (error) {
       console.error(
         `Mint not found on this network!- ${provider.connection.rpcEndpoint}`
@@ -76,32 +67,6 @@ describe("token-vault", () => {
       ASSOCIATED_TOKEN_PROGRAM_ID
     );
     console.log(`user_ata ${owner_ata}`);
-    // const owner_ata_tx = new anchor.web3.Transaction().add(
-    //   createAssociatedTokenAccountInstruction(
-    //     owner.publicKey,
-    //     owner_ata,
-    //     owner.publicKey,
-    //     mint,
-    //     TOKEN_2022_PROGRAM_ID,
-    //     ASSOCIATED_TOKEN_PROGRAM_ID
-    //   )
-    // );
-    // const tx = await provider.sendAndConfirm(owner_ata_tx);
-    // console.log(`owner_ata_tx ${tx}`);
-
-    // Mint Tokens to User Account
-    // const mintTx = await mintTo(
-    //   provider.connection,
-    //   owner.payer,
-    //   mint,
-    //   user_ata,
-    //   owner.payer,
-    //   1000000 * decimals,
-    //   [],
-    //   { commitment: "confirmed" },
-    //   TOKEN_2022_PROGRAM_ID
-    // );
-    // console.log(`MintTo Txn- ${mintTx}`);
     // Create seed, PDA, Vault Account
     [vaultStatePDA, vaultStateBump] =
       anchor.web3.PublicKey.findProgramAddressSync(
@@ -122,14 +87,17 @@ describe("token-vault", () => {
     ).catch((err) => console.log(err));
     console.log(`Owner Token Balance-Initially- - ${owner_bal}`);
   });
+
   it("Token Vault is initialized!", async () => {
     try {
       // Check if vault state already exists
-      const vaultStateAccount = await provider.connection.getAccountInfo(
-        vaultStatePDA
-      );
-
+      const vaultStateAccount = await provider.connection.getAccountInfo(vault);
       if (vaultStateAccount) {
+        let vault_bal = await getTokenBalanceSpl(
+          provider.connection,
+          vault
+        ).catch((err) => console.log(err));
+        console.log(`Owner Token Balance-Initially- - ${vault_bal}`);
         console.log("Vault already initialized, skipping...");
         return;
       }
