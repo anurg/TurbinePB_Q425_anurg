@@ -22,7 +22,7 @@ import {
 
 } from "@solana/spl-token";
 import {createInitializeInstruction, createUpdateFieldInstruction, pack, type TokenMetadata} from "@solana/spl-token-metadata";
-import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
+import wallet from "/home/nkbblocks/.config/solana/id.json" with {type:"json"};
 // Importing Wallet from local Solana config
 const keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 
@@ -99,5 +99,5 @@ const transaction = new Transaction().add(
     updateMetadataInstruction
 );
 const txnSignature = await sendAndConfirmTransaction(connection,transaction,[keypair,mint]);
-console.log(`Mint created! Mint Address: ${mint.publicKey}`);
+console.log(`Mint created! Mint Address: https://explorer.solana.com/address/${mint.publicKey}?cluster=devne`);
 console.log(`Check out your TX here: https://explorer.solana.com/tx/${txnSignature}?cluster=devnet`);

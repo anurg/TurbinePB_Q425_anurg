@@ -1,6 +1,13 @@
 import { Connection, Keypair, PublicKey, type Commitment } from "@solana/web3.js";
-import { getAssociatedTokenAddress, getOrCreateAssociatedTokenAccount, mintTo } from "@solana/spl-token";
-import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
+import { 
+    getAssociatedTokenAddress, 
+    getOrCreateAssociatedTokenAccount, 
+    mintTo,
+    createAssociatedTokenAccountIdempotent,
+    TOKEN_2022_PROGRAM_ID,
+    ASSOCIATED_TOKEN_PROGRAM_ID
+ } from "@solana/spl-token";
+import wallet from "/home/nkbblocks/.config/solana/id.json" with {type:"json"};
 
 let keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 console.log(`Wallet Public Key- ${keypair.publicKey}`);
@@ -8,22 +15,34 @@ console.log(`Wallet Public Key- ${keypair.publicKey}`);
 let commitment:Commitment = "confirmed";
 let connection = new Connection("https://api.devnet.solana.com",commitment);
 
-let mint = new PublicKey("Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB");
+let mint = new PublicKey("47DeD9hzZAHX9SMq99PGpvu4MGqaw4JY4oZvpGy3caB2");
 let decimals = 1_000_000;
 // let user = Keypair.generate();
 
 async function mintToUser(user:Keypair, numToken:number) {
-    // create ATA
-    let ata = await getOrCreateAssociatedTokenAccount(connection,keypair,mint,user.publicKey);
-    // Mint to ATA
+   
     try {
+         // create ATA
+        let ata = await createAssociatedTokenAccountIdempotent(
+            connection,
+            keypair,
+            mint,
+            keypair.publicKey,
+            undefined,
+            TOKEN_2022_PROGRAM_ID,
+            ASSOCIATED_TOKEN_PROGRAM_ID,
+            true
+        );
         let txnSignature = await mintTo(
         connection,
         keypair,
         mint,
-        ata.address,
+        ata,
         keypair,
-        numToken * decimals
+        numToken * decimals,
+        [],
+        undefined,
+        TOKEN_2022_PROGRAM_ID       
     );
     let txnSignatureLink= `https://solscan.io/tx/${txnSignature}?cluster=devnet`
      console.log(`${numToken} Token Allocated to User- ${user.publicKey} and txnSignature is - ${txnSignatureLink}`);
@@ -32,4 +51,4 @@ async function mintToUser(user:Keypair, numToken:number) {
     }
 }
 await mintToUser(keypair,100000);
-console.log(`spl_mint`);
+
