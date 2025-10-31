@@ -14,12 +14,13 @@ import {
 import { TokenVault } from "../target/types/token_vault";
 
 describe("token-vault", () => {
+  
   // Configure the client to use the local cluster.
   let provider = anchor.AnchorProvider.env();
   anchor.setProvider(provider);
   let owner = provider.wallet;
 
-   let user = anchor.web3.Keypair.generate();
+   let user = anchor.web3.Keypair.generate();// user will be minted Token
 
   const program = anchor.workspace.tokenVault as Program<TokenVault>;
   /*
@@ -35,6 +36,7 @@ describe("token-vault", () => {
   let vault: anchor.web3.PublicKey;
   const decimals = 1_000_000;
   before(async () => {
+    // await airdrop(provider.connection, user.publicKey);
     // Minting Token
     mint = await createMint(
       provider.connection,
@@ -90,7 +92,7 @@ describe("token-vault", () => {
     // Create seed, PDA, Vault Account
     [vaultStatePDA, vaultStateBump] =
       anchor.web3.PublicKey.findProgramAddressSync(
-        [Buffer.from("state"), owner.publicKey.toBuffer()],
+        [Buffer.from("state"), user.publicKey.toBuffer()],
         program.programId
       );
     vault = getAssociatedTokenAddressSync(mint, vaultStatePDA, true,TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID);
@@ -105,23 +107,25 @@ describe("token-vault", () => {
     const tx = await program.methods
       .initialize()
       .accountsStrict({
-        owner: provider.wallet.publicKey,
+        owner: user.publicKey,
         mint: mint,
         vault,
         vaultState: vaultStatePDA,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
-      })
+      }).signers([user])
       .rpc();
     console.log("Your transaction signature", tx);
   });
+
+
   it("Deposit Token in Vault!", async () => {
     
     const tx = await program.methods
       .deposit(new anchor.BN(10000 * decimals))
       .accountsStrict({
-        owner: provider.wallet.publicKey,
+        owner: user.publicKey,
         ownerAta: user_ata,
         mint: mint,
         vault,
@@ -129,7 +133,7 @@ describe("token-vault", () => {
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
-      })
+      }).signers([user])
       .rpc();
     console.log("Your transaction signature", tx);
 
@@ -145,11 +149,13 @@ describe("token-vault", () => {
     console.log(`Vault Token Balance - ${vault_bal}`);
     console.log(`Vault Address - ${vault}`);
   });
+
+
   it("Withdraw Some Tokens from Vault!", async () => {
     const tx = await program.methods
       .withdraw(new anchor.BN(4000*decimals))
       .accountsStrict({
-        owner: provider.wallet.publicKey,
+        owner: user.publicKey,
         ownerAta: user_ata,
         mint: mint,
         vault,
@@ -157,7 +163,7 @@ describe("token-vault", () => {
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
-      })
+      }).signers([user])
       .rpc();
     console.log("Your transaction signature", tx);
 
@@ -181,4 +187,8 @@ async function getTokenBalanceSpl(connection, tokenAccount) {
   const mint = await getMint(connection, info.mint,"confirmed",TOKEN_2022_PROGRAM_ID);
   const balance = amount / 10 ** mint.decimals;
   return balance;
+}
+// ---------airdrop sol
+async function airdrop(connection: any, address: any, amount = 100 * anchor.web3.LAMPORTS_PER_SOL) {
+  await connection.confirmTransaction(await connection.requestAirdrop(address, amount), "confirmed");
 }
