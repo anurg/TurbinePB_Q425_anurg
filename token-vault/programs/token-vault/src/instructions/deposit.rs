@@ -11,6 +11,7 @@ use crate::state::*;
 pub struct Deposit<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
+    #[account(mint::token_program=token_program)]
     pub mint: InterfaceAccount<'info, Mint>,
     #[account(
         mut, 

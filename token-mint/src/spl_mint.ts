@@ -7,15 +7,18 @@ import {
     TOKEN_2022_PROGRAM_ID,
     ASSOCIATED_TOKEN_PROGRAM_ID
  } from "@solana/spl-token";
-import wallet from "/home/nkbblocks/.config/solana/id.json" with {type:"json"};
+import wallet from "/home/nkb/.config/solana/id.json" with {type:"json"};
 
 let keypair = Keypair.fromSecretKey(new Uint8Array(wallet));
 console.log(`Wallet Public Key- ${keypair.publicKey}`);
 
 let commitment:Commitment = "confirmed";
-let connection = new Connection("https://api.devnet.solana.com",commitment);
+// let connection = new Connection("https://api.devnet.solana.com",commitment);  //for devnet
+let connection = new Connection("http://localhost:8899",commitment); //for localnet
 
-let mint = new PublicKey("EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW");
+// let mint = new PublicKey("EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW");
+let mint = new PublicKey("DovtRR1usR4F6hMutnu7fwmTM6PY9N1L2TdAfxs9t8qG");
+
 let decimals = 1_000_000;
 // let user = Keypair.generate();
 
@@ -33,6 +36,8 @@ async function mintToUser(user:Keypair, mint:PublicKey, numToken:number) {
             ASSOCIATED_TOKEN_PROGRAM_ID,
             true
         );
+
+
         let txnSignature = await mintTo(
         connection,
         keypair,
