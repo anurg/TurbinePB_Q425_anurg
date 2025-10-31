@@ -115,7 +115,7 @@ describe("token-vault", () => {
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
-      .signers([user, owner.payer])
+      .signers([user])
       .rpc();
     console.log("Your transaction signature", tx);
   });
@@ -133,7 +133,7 @@ describe("token-vault", () => {
         tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
-      .signers([user, owner.payer])
+      .signers([user])
       .rpc();
     console.log("Your transaction signature", tx);
 
