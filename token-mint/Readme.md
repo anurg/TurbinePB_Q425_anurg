@@ -47,12 +47,10 @@ Inside the json file , you can give URL of Image
 npx ts-node src/spl_with_metadata.ts
 ```
 
-##### Task 2
-This will output the generated Token & Transaction Signature
-
+##### Task 2 (Part 1)
 
 - Mint created! Mint Address: 
-https://explorer.solana.com/tx/Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB?cluster=devnet
+https://explorer.solana.com/address/Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB?cluster=devnet 
 
 - Mint Tx
  https://explorer.solana.com/tx/2RbrPSGnnaQF2Nh42VNqsnKibaksmtuuQzsb1swFKNmRHuBRY75FJBqfWPkzxe5pSqTnwj1rYSsLfXARGhaU5daB?cluster=devnet
