@@ -137,67 +137,65 @@ describe("token-vault", () => {
       .signers([owner.payer])
       .rpc();
     console.log("Your transaction signature", tx);
-
-    let owner_bal = await getTokenBalanceSpl(
-      provider.connection,
-      owner_ata
-    ).catch((err) => console.log(err));
-    console.log(`Owner Token Balance after deposit - ${owner_bal}`);
-
     let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
       (err) => console.log(err)
     );
     console.log(`Vault Token Balance - ${vault_bal}`);
     console.log(`Vault Address - ${vault}`);
+      let owner_bal = await getTokenBalanceSpl(
+      provider.connection,
+      owner_ata
+    ).catch((err) => console.log(err));
+    console.log(`Owner Token Balance after deposit - ${owner_bal}`);
   });
 
-  // it("Withdraw Some Tokens from Vault!", async () => {
-  //   const tx = await program.methods
-  //     .withdraw(new anchor.BN(4000 * decimals))
-  //     .accountsStrict({
-  //       owner: owner.publicKey,
-  //       ownerAta: owner_ata,
-  //       mint: mint,
-  //       vault,
-  //       vaultState: vaultStatePDA,
-  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //       tokenProgram: TOKEN_2022_PROGRAM_ID,
-  //       systemProgram: anchor.web3.SystemProgram.programId,
-  //     })
-  //     .signers([owner.payer])
-  //     .rpc();
-  //   console.log("Your transaction signature", tx);
+  it("Withdraw Some Tokens from Vault!", async () => {
+    const tx = await program.methods
+      .withdraw(new anchor.BN(4000 * decimals))
+      .accountsStrict({
+        owner: owner.publicKey,
+        ownerAta: owner_ata,
+        mint: mint,
+        vault,
+        vaultState: vaultStatePDA,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([owner.payer])
+      .rpc();
+    console.log("Your transaction signature", tx);
 
-  //   let owner_bal = await getTokenBalanceSpl(
-  //     provider.connection,
-  //     owner_ata
-  //   ).catch((err) => console.log(err));
-  //   console.log(
-  //     `Owner Token Balance-after 4000 withdrawal from Vault  - ${owner_bal}`
-  //   );
+    let owner_bal = await getTokenBalanceSpl(
+      provider.connection,
+      owner_ata
+    ).catch((err) => console.log(err));
+    console.log(
+      `Owner Token Balance-after 4000 withdrawal from Vault  - ${owner_bal}`
+    );
 
-  //   let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
-  //     (err) => console.log(err)
-  //   );
-  //   console.log(`Vault Token Balance after 4000 withdrawal - ${vault_bal}`);
-  // });
-  // it("Token Vault is Closed!", async () => {
-  //     const tx = await program.methods
-  //       .close()
-  //       .accountsStrict({
-  //         owner: owner.publicKey,
-  //         mint: mint,
-  //         ownerAta:owner_ata,
-  //         vault,
-  //         vaultState: vaultStatePDA,
-  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-  //         tokenProgram: TOKEN_2022_PROGRAM_ID,
-  //         systemProgram: anchor.web3.SystemProgram.programId,
-  //       })
-  //       .signers([owner.payer])
-  //       .rpc();
-  //     console.log("Your transaction signature", tx);
-  //   });
+    let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
+      (err) => console.log(err)
+    );
+    console.log(`Vault Token Balance after 4000 withdrawal - ${vault_bal}`);
+  });
+  it("Token Vault is Closed!", async () => {
+      const tx = await program.methods
+        .close()
+        .accountsStrict({
+          owner: owner.publicKey,
+          mint: mint,
+          ownerAta:owner_ata,
+          vault,
+          vaultState: vaultStatePDA,
+          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+          tokenProgram: TOKEN_2022_PROGRAM_ID,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .signers([owner.payer])
+        .rpc();
+      console.log("Your transaction signature", tx);
+    });
 });
 
 // -------get SPL Token Balance
