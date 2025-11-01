@@ -3,12 +3,12 @@ import { Program } from "@coral-xyz/anchor";
 import {
   createMint,
   mintTo,
-  TOKEN_PROGRAM_ID,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync,
   createAssociatedTokenAccountInstruction,
   getAccount,
   getMint,
+  TOKEN_2022_PROGRAM_ID
 } from "@solana/spl-token";
 import { AnchorEscrow } from "../target/types/anchor_escrow";
 import * as fs from "fs";
@@ -33,8 +33,9 @@ describe("anchor-escrow", () => {
   // 7.
   //----------------------//
   const maker = provider.wallet.publicKey;
-  //   const taker = anchor.web3.Keypair.generate();/
+    // const taker = anchor.web3.Keypair.generate();
   const taker = loadOrGenerateKeypair();
+  
   console.log(`Taker: - ${taker.publicKey}`);
   let mint_a: anchor.web3.PublicKey;
   let mint_b: anchor.web3.PublicKey;
@@ -48,15 +49,10 @@ describe("anchor-escrow", () => {
   let vault: anchor.web3.PublicKey;
   const decimals = 1_000_000;
   before(async () => {
+    // await airdrop(provider.connection,taker.publicKey);  //comment in Devnet
     console.log(
       `Balance of Maker- ${await provider.connection.getBalance(maker)}`
     );
-    // await provider.connection.confirmTransaction(
-    //   await provider.connection.requestAirdrop(
-    //     taker.publicKey,
-    //     1 * anchor.web3.LAMPORTS_PER_SOL
-    //   )
-    // );
     console.log(
       `Balance of Taker- ${await provider.connection.getBalance(
         taker.publicKey
@@ -64,31 +60,43 @@ describe("anchor-escrow", () => {
     );
 
     // minta , mintb ------------------------------------------
-    // mint_a = await createMint(
-    //   provider.connection,
-    //   provider.wallet.payer,
-    //   maker,
-    //   null,
-    //   2
-    // );
     mint_a = new anchor.web3.PublicKey(
-      "Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB"
+      "EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW"
     );
-
     console.log(`mint_a ${mint_a}`);
+    // Verify the mint exists
+    try {
+      const mintInfo = await getMint(
+        provider.connection,
+        mint_a,
+        "confirmed",
+        TOKEN_2022_PROGRAM_ID
+      );
+      console.log(
+        `Mint found! Decimals: ${mintInfo.decimals}- ${provider.connection.rpcEndpoint}`
+      );
+    } catch (error) {
+      console.error(
+        `Mint not found on this network!- ${provider.connection.rpcEndpoint}`
+      );
+      throw error;
+    }
     mint_b = await createMint(
       provider.connection,
-      provider.wallet.payer,
+      taker,
       taker.publicKey,
       null,
-      6
+      6,
+      undefined,
+      { commitment: "confirmed" },
+      TOKEN_2022_PROGRAM_ID
     );
     console.log(`mint_b ${mint_b}`);
     // -------------------------------------------------------------
 
     //Create maker_ata_a and mint tokens to it ----------------------
-    maker_ata_a = getAssociatedTokenAddressSync(mint_a, maker);
-    maker_ata_b = getAssociatedTokenAddressSync(mint_b, maker);
+    maker_ata_a = getAssociatedTokenAddressSync(mint_a, maker,false,TOKEN_2022_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
+    maker_ata_b = getAssociatedTokenAddressSync(mint_b, maker,false,TOKEN_2022_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
     //
 
     let maker_a_bal = await getTokenBalanceSpl(
@@ -99,24 +107,29 @@ describe("anchor-escrow", () => {
     //----------------------------------------------------------------
 
     //Create taker_ata_b and mint tokens to it ----------------------
-    taker_ata_a = getAssociatedTokenAddressSync(mint_a, taker.publicKey);
-    taker_ata_b = getAssociatedTokenAddressSync(mint_b, taker.publicKey);
+    taker_ata_a = getAssociatedTokenAddressSync(mint_a, taker.publicKey,false,TOKEN_2022_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
+    taker_ata_b = getAssociatedTokenAddressSync(mint_b, taker.publicKey,false,TOKEN_2022_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
     const taker_ata_b_tx = new anchor.web3.Transaction().add(
       await createAssociatedTokenAccountInstruction(
         provider.wallet.publicKey,
         taker_ata_b,
         taker.publicKey,
-        mint_b
+        mint_b,
+        TOKEN_2022_PROGRAM_ID,
+        ASSOCIATED_TOKEN_PROGRAM_ID
       )
     );
     await provider.sendAndConfirm(taker_ata_b_tx);
     await mintTo(
       provider.connection,
-      provider.wallet.payer,
+      taker,
       mint_b,
       taker_ata_b,
       taker,
-      50000 * decimals
+      50000 * decimals,
+      [],
+      {commitment:"confirmed"},
+      TOKEN_2022_PROGRAM_ID
     );
     let taker_b_bal = await getTokenBalanceSpl(
       provider.connection,
@@ -134,7 +147,7 @@ describe("anchor-escrow", () => {
       ],
       program.programId
     );
-    vault = getAssociatedTokenAddressSync(mint_a, escrowPDA, true);
+    vault = getAssociatedTokenAddressSync(mint_a, escrowPDA, true,TOKEN_2022_PROGRAM_ID,ASSOCIATED_TOKEN_PROGRAM_ID);
   });
 
   it("Make an Offer!", async () => {
@@ -152,22 +165,23 @@ describe("anchor-escrow", () => {
         escrow: escrowPDA,
         vault: vault,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
       .rpc();
     console.log("Your transaction signature", tx);
+        const ATAA = (
+      await provider.connection.getTokenAccountBalance(
+        maker_ata_a
+      )
+    ).value.amount;
+    console.log(`The amount in Maker ATA -a after Offer is taken: ${ATAA}`);
     const vaultBalance = (
       await provider.connection.getTokenAccountBalance(vault)
     ).value.amount;
     console.log(`The amount in Vault is ${vaultBalance}`);
 
-    const ATAA = (
-      await provider.connection.getTokenAccountBalance(
-        getAssociatedTokenAddressSync(mint_a, maker)
-      )
-    ).value.amount;
-    console.log(`The amount in Maker ATA -a after Offer is taken: ${ATAA}`);
+
   });
 
   //   it("Refund Offer!", async () => {
@@ -205,7 +219,7 @@ describe("anchor-escrow", () => {
         escrow: escrowPDA,
         vault: vault,
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
       .signers([taker])
@@ -216,17 +230,8 @@ describe("anchor-escrow", () => {
     ).value.amount;
     console.log(`The amount in Maker ATA-a after Offer is taken: ${ATAAA}`);
 
-    const ATAA = (
-      await provider.connection.getTokenAccountBalance(
-        getAssociatedTokenAddressSync(mint_a, taker.publicKey)
-      )
-    ).value.amount;
-    console.log(`The amount in Taker ATA -a after offer is taken: ${ATAA}`);
-
     const ATAB = (
-      await provider.connection.getTokenAccountBalance(
-        getAssociatedTokenAddressSync(mint_b, maker)
-      )
+      await provider.connection.getTokenAccountBalance(maker_ata_b)
     ).value.amount;
     console.log(`The amount in Maker ATA -b after Offer is taken: ${ATAB}`);
   });
@@ -235,9 +240,9 @@ describe("anchor-escrow", () => {
 // ----------Helper Functions
 // -------get SPL Token Balance
 async function getTokenBalanceSpl(connection, tokenAccount) {
-  const info = await getAccount(connection, tokenAccount);
+  const info = await getAccount(connection, tokenAccount,"confirmed",TOKEN_2022_PROGRAM_ID);
   const amount = Number(info.amount);
-  const mint = await getMint(connection, info.mint);
+  const mint = await getMint(connection, info.mint,"confirmed",TOKEN_2022_PROGRAM_ID);
   const balance = amount / 10 ** mint.decimals;
   // console.log('Balance (using Solana-Web3.js): ', balance);
   return balance;
@@ -276,4 +281,15 @@ function loadOrGenerateKeypair(): anchor.web3.Keypair {
   //   }
 
   //   return keypair;
+}
+// ---------airdrop sol
+async function airdrop(
+  connection: any,
+  address: any,
+  amount = 100 * anchor.web3.LAMPORTS_PER_SOL
+) {
+  await connection.confirmTransaction(
+    await connection.requestAirdrop(address, amount),
+    "confirmed"
+  );
 }
