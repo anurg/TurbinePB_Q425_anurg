@@ -12,8 +12,8 @@ token_vault = "2G4HWVWq2Fgg9s1r1nHMpt8irugsB8EsaPKrNWJa6YAX"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/token-vault.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/task.ts"
