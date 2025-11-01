@@ -40,7 +40,7 @@ describe("token-vault", () => {
     mint = await createMint(
       provider.connection,
       owner.payer,
-      owner.publicKey,
+      user.publicKey,
       null,
       6,
       undefined,
@@ -76,7 +76,7 @@ describe("token-vault", () => {
       owner.payer,
       mint,
       user_ata,
-      owner.payer,
+      user,
       1000000 * decimals,
       [],
       { commitment: "confirmed" },
@@ -179,6 +179,23 @@ describe("token-vault", () => {
       (err) => console.log(err)
     );
     console.log(`Vault Token Balance after 4000 withdrawal - ${vault_bal}`);
+  });
+  it("Token Vault is Closed!", async () => {
+    const tx = await program.methods
+      .close()
+      .accountsStrict({
+        owner: user.publicKey,
+        mint: mint,
+        ownerAta:user_ata,
+        vault,
+        vaultState: vaultStatePDA,
+        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+        tokenProgram: TOKEN_2022_PROGRAM_ID,
+        systemProgram: anchor.web3.SystemProgram.programId,
+      })
+      .signers([user])
+      .rpc();
+    console.log("Your transaction signature", tx);
   });
 });
 
