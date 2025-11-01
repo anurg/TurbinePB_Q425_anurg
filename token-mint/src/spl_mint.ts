@@ -17,7 +17,7 @@ let commitment:Commitment = "confirmed";
 let connection = new Connection("http://localhost:8899",commitment); //for localnet
 
 // let mint = new PublicKey("EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW");
-let mint = new PublicKey("63LT2rzQ87txRNp1jiKtiR1zSk5tfje23iQ1NcrnTcB6");
+let mint = new PublicKey("H4ibovWuSYfUqab5gGngqwvQTZY1rfb1xxjTxTm4NqUt");
 
 let decimals = 1_000_000;
 // let user = Keypair.generate();
