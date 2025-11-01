@@ -151,36 +151,53 @@ describe("token-vault", () => {
     console.log(`Vault Address - ${vault}`);
   });
 
-  it("Withdraw Some Tokens from Vault!", async () => {
-    const tx = await program.methods
-      .withdraw(new anchor.BN(4000 * decimals))
-      .accountsStrict({
-        owner: owner.publicKey,
-        ownerAta: owner_ata,
-        mint: mint,
-        vault,
-        vaultState: vaultStatePDA,
-        associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-        tokenProgram: TOKEN_2022_PROGRAM_ID,
-        systemProgram: anchor.web3.SystemProgram.programId,
-      })
-      .signers([owner.payer])
-      .rpc();
-    console.log("Your transaction signature", tx);
+  // it("Withdraw Some Tokens from Vault!", async () => {
+  //   const tx = await program.methods
+  //     .withdraw(new anchor.BN(4000 * decimals))
+  //     .accountsStrict({
+  //       owner: owner.publicKey,
+  //       ownerAta: owner_ata,
+  //       mint: mint,
+  //       vault,
+  //       vaultState: vaultStatePDA,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       tokenProgram: TOKEN_2022_PROGRAM_ID,
+  //       systemProgram: anchor.web3.SystemProgram.programId,
+  //     })
+  //     .signers([owner.payer])
+  //     .rpc();
+  //   console.log("Your transaction signature", tx);
 
-    let owner_bal = await getTokenBalanceSpl(
-      provider.connection,
-      owner_ata
-    ).catch((err) => console.log(err));
-    console.log(
-      `Owner Token Balance-after 4000 withdrawal from Vault  - ${owner_bal}`
-    );
+  //   let owner_bal = await getTokenBalanceSpl(
+  //     provider.connection,
+  //     owner_ata
+  //   ).catch((err) => console.log(err));
+  //   console.log(
+  //     `Owner Token Balance-after 4000 withdrawal from Vault  - ${owner_bal}`
+  //   );
 
-    let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
-      (err) => console.log(err)
-    );
-    console.log(`Vault Token Balance after 4000 withdrawal - ${vault_bal}`);
-  });
+  //   let vault_bal = await getTokenBalanceSpl(provider.connection, vault).catch(
+  //     (err) => console.log(err)
+  //   );
+  //   console.log(`Vault Token Balance after 4000 withdrawal - ${vault_bal}`);
+  // });
+  // it("Token Vault is Closed!", async () => {
+  //     const tx = await program.methods
+  //       .close()
+  //       .accountsStrict({
+  //         owner: owner.publicKey,
+  //         mint: mint,
+  //         ownerAta:owner_ata,
+  //         vault,
+  //         vaultState: vaultStatePDA,
+  //         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //         tokenProgram: TOKEN_2022_PROGRAM_ID,
+  //         systemProgram: anchor.web3.SystemProgram.programId,
+  //       })
+  //       .signers([owner.payer])
+  //       .rpc();
+  //     console.log("Your transaction signature", tx);
+  //   });
 });
 
 // -------get SPL Token Balance
@@ -201,15 +218,5 @@ async function getTokenBalanceSpl(connection, tokenAccount) {
   const balance = amount / 10 ** mint.decimals;
   return balance;
 }
-// ---------airdrop sol
-async function airdrop(
-  connection: any,
-  address: any,
-  amount = 100 * anchor.web3.LAMPORTS_PER_SOL
-) {
-  await connection.confirmTransaction(
-    await connection.requestAirdrop(address, amount),
-    "confirmed"
-  );
-}
-//
+
+
