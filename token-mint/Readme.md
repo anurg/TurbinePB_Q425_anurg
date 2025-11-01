@@ -48,10 +48,14 @@ npx ts-node src/spl_with_metadata.ts
 ```
 
 ##### Task 2 (Part 1)
+![](token-mint.jpg)
 
-- Mint created! Mint Address: 
-https://explorer.solana.com/address/Ahx9ssjAyFCvncH46X21Kfzy7LWKgf1zwmHt7Fmc8yZB?cluster=devnet 
+- Mint Address
+https://explorer.solana.com/address/EDT4VRxdvHvyYKordZ7668hZ8bGGFVmhC3Us6dXzaPZW?cluster=devnet
 
 - Mint Tx
- https://explorer.solana.com/tx/2RbrPSGnnaQF2Nh42VNqsnKibaksmtuuQzsb1swFKNmRHuBRY75FJBqfWPkzxe5pSqTnwj1rYSsLfXARGhaU5daB?cluster=devnet
+https://explorer.solana.com/tx/3d6EJKFAue1EJmJ7CwWVTHc3Tps7zYLJpJ535ZSJg1p12nwmSqtGUehjbrUM4pHMkdtXnriqAM7uQyKSVF7n2eCd?cluster=devnet
 
+
+###### Mint token to Wallet
+https://explorer.solana.com/tx/2AiLQSWyCrJhEYtWiW6cBrYu8nzHhnGNwDLSY4yRHQnTpkuDCjbxgpPhjDzSsirLoZcBh1zascAWqMsoCB5sCCUE?cluster=devnet
