@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("BQVCuG9QqhSHZit1erhk56sEBFMqKxjowRz8kP3CXRbb");
+declare_id!("2G4HWVWq2Fgg9s1r1nHMpt8irugsB8EsaPKrNWJa6YAX");
 
 #[program]
 pub mod token_vault {
@@ -23,5 +23,8 @@ pub mod token_vault {
     }
     pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
         ctx.accounts.withdraw(amount)
+    }
+    pub fn close(ctx: Context<Close>) -> Result<()> {
+        ctx.accounts.close()
     }
 }
