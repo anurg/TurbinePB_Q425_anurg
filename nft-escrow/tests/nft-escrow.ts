@@ -8,10 +8,17 @@ import {
   createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
 import walletFile from "/home/nkb/.config/solana/id.json"; // ← Same wallet!
+import keypairTaker from "../keypair1.json"; // ← Same wallet!
 
 describe("nft-escrow", () => {
-  // Use the SAME wallet that minted the NFT
+  // Use the SAME wallet that minted the NFT earlier-
+  //// uncomment these for doing NFT escrow transfer- from payer to taker
   const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
+  const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
+
+  //// uncomment these to reverse the NFT escrow transfer- from taker to payer
+  // const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
+  // const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
 
   const connection = new anchor.web3.Connection(
     "https://api.devnet.solana.com",
@@ -37,7 +44,12 @@ describe("nft-escrow", () => {
     false,
     TOKEN_PROGRAM_ID
   );
-
+  const taker_nft_ata = getAssociatedTokenAddressSync(
+    nft_mint,
+    taker.publicKey,
+    false,
+    TOKEN_PROGRAM_ID
+  );
   const [escrow] = anchor.web3.PublicKey.findProgramAddressSync(
     [
       Buffer.from("escrow"),
@@ -63,7 +75,7 @@ describe("nft-escrow", () => {
     METADATA_PROGRAM_ID
   );
 
-  const received = new anchor.BN(0.1 * anchor.web3.LAMPORTS_PER_SOL);
+  const received = new anchor.BN(1.5 * anchor.web3.LAMPORTS_PER_SOL);
   it("NFT Vault Is initialized!", async () => {
     const tx = await program.methods
       .make(nft_mint, received)
@@ -82,13 +94,14 @@ describe("nft-escrow", () => {
 
     console.log("✅ Transaction:", tx);
   });
-  it("NFT Vault Is Refunded!", async () => {
+  it("Taker Accepts the Offer to exchange NFT for lamports!", async () => {
     const tx = await program.methods
-      .refund(nft_mint)
+      .take()
       .accounts({
         maker: payer.publicKey,
+        taker: taker.publicKey,
         nftMint: nft_mint,
-        makerNftAta: maker_nft_ata,
+        takerNftAta: taker_nft_ata,
         vault: vault,
         metadata: metadata_account,
         metadataProgram: METADATA_PROGRAM_ID,
@@ -96,8 +109,27 @@ describe("nft-escrow", () => {
         associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
         systemProgram: anchor.web3.SystemProgram.programId,
       })
+      .signers([taker])
       .rpc();
 
     console.log("✅ Transaction:", tx);
   });
+  // it("NFT Vault Is Refunded!", async () => {
+  //   const tx = await program.methods
+  //     .refund(nft_mint)
+  //     .accounts({
+  //       maker: payer.publicKey,
+  //       nftMint: nft_mint,
+  //       makerNftAta: maker_nft_ata,
+  //       vault: vault,
+  //       metadata: metadata_account,
+  //       metadataProgram: METADATA_PROGRAM_ID,
+  //       tokenProgram: TOKEN_PROGRAM_ID,
+  //       associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+  //       systemProgram: anchor.web3.SystemProgram.programId,
+  //     })
+  //     .rpc();
+
+  //   console.log("✅ Transaction:", tx);
+  // });
 });

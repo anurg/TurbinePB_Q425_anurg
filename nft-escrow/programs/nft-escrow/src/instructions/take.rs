@@ -2,6 +2,7 @@ use crate::error::*;
 use crate::state::*;
 use anchor_lang::prelude::*;
 
+use anchor_lang::system_program::{transfer, Transfer};
 use anchor_spl::{
     associated_token::AssociatedToken,
     metadata::{Metadata, MetadataAccount, ID as MetadataID},
@@ -11,18 +12,27 @@ use anchor_spl::{
     },
 };
 #[derive(Accounts)]
-pub struct Refund<'info> {
+pub struct Take<'info> {
     #[account(mut)]
     pub maker: Signer<'info>,
+    #[account(mut)]
+    pub taker: Signer<'info>,
     #[account(mint::token_program=token_program)]
     pub nft_mint: InterfaceAccount<'info, Mint>,
     #[account(
-        mut,
         associated_token::mint=nft_mint,
         associated_token::authority=maker,
         associated_token::token_program=token_program,
     )]
     pub maker_nft_ata: InterfaceAccount<'info, TokenAccount>,
+    #[account(
+        init_if_needed,
+        payer=taker,
+        associated_token::mint=nft_mint,
+        associated_token::authority=taker,
+        associated_token::token_program=token_program,
+    )]
+    pub taker_nft_ata: InterfaceAccount<'info, TokenAccount>,
     #[account(
         mut,
         close=maker,
@@ -49,19 +59,28 @@ pub struct Refund<'info> {
     pub system_program: Program<'info, System>,
 }
 
-impl<'info> Refund<'info> {
-    pub fn refund(&mut self, nft_mint: Pubkey) -> Result<()> {
+impl<'info> Take<'info> {
+    pub fn take(&mut self) -> Result<()> {
         require!(self.nft_mint.supply == 1, NFTEscrowErrors::NFTSupplyError);
         require!(
             self.nft_mint.decimals == 0,
             NFTEscrowErrors::NFTDecimalsError
         );
-        //transfer nft from vault ATA to maker ATA
+        // cpi transfer lamports from taker to maker
+        let cpi_trf_context = CpiContext::new(
+            self.system_program.to_account_info(),
+            Transfer {
+                from: self.taker.to_account_info(),
+                to: self.maker.to_account_info(),
+            },
+        );
+        transfer(cpi_trf_context, self.escrow.received)?;
+        //transfer nft from vault ATA to taker ATA
         let cpi_program = self.token_program.to_account_info();
         let cpi_accounts = TransferChecked {
             from: self.vault.to_account_info(),
             mint: self.nft_mint.to_account_info(),
-            to: self.maker_nft_ata.to_account_info(),
+            to: self.taker_nft_ata.to_account_info(),
             authority: self.escrow.to_account_info(),
         };
         let seeds = &[

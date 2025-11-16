@@ -22,4 +22,7 @@ pub mod nft_escrow {
     pub fn refund(ctx: Context<Refund>, nft_mint: Pubkey) -> Result<()> {
         ctx.accounts.refund(nft_mint)
     }
+    pub fn take(ctx: Context<Take>) -> Result<()> {
+        ctx.accounts.take()
+    }
 }
