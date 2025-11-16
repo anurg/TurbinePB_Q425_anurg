@@ -7,5 +7,4 @@ pub struct Escrow {
     pub nft_mint: Pubkey,
     pub received: u64,
     pub escrow_bump: u8,
-    pub vault_bump: u8,
 }

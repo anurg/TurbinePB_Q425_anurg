@@ -13,9 +13,13 @@ declare_id!("F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk");
 
 #[program]
 pub mod nft_escrow {
+
     use super::*;
 
-    pub fn initialize(ctx: Context<Make>) -> Result<()> {
-        ctx.accounts.make()
+    pub fn make(ctx: Context<Make>, nft_mint: Pubkey, received: u64) -> Result<()> {
+        ctx.accounts.make(nft_mint, received, &ctx.bumps)
+    }
+    pub fn refund(ctx: Context<Refund>, nft_mint: Pubkey) -> Result<()> {
+        ctx.accounts.refund(nft_mint)
     }
 }

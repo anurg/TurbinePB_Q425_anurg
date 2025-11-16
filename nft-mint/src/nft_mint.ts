@@ -26,7 +26,7 @@ const mint = generateSigner(umi);
     let tx = createNft(umi, {
       mint,
       name: "Witch on Solana",
-      uri: "https://gateway.irys.xyz/BzgZh5n7Q9a6RKEWABnPWXCgCmRgcMNzkCG7JU7ztR3e",
+      uri: "https://gateway.irys.xyz/EPyhj4KUga3SSjTSMFN46RrEEpkQofuC7SpW8DhjNEVC",
       sellerFeeBasisPoints: percentAmount(5),
     });
     let result = await tx.sendAndConfirm(umi);
@@ -49,3 +49,6 @@ const mint = generateSigner(umi);
 // Succesfully Minted! Check out your TX here:
 // https://explorer.solana.com/tx/4qmNYv14miGiJWmV8M7N2ZVVucyYTprxP51T5zkeHHZJXpYZ9jSQXoBL6CbU2M6pWXuzsqC9vL8jLsxZM84rfqf5?cluster=devnet
 // Mint Address:  DoFgr6u1eqXGe9EBt99YkTgdZ1G4HL3XvVYqytBb851w
+
+// https://explorer.solana.com/tx/5ogmAmyut6DjRTweQycYgyrZehm9ct6iGHqQ3qBdRE2RXvBPMznWX7cUcedaZzEzujqrpgDdt9aJaypvqt7dVC2X?cluster=devnet
+// Mint Address:  95YsrDRo29v3uHvoDxGEJk9zRiU3Wn1nAxVdrY1CYF6T

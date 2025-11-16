@@ -12,7 +12,8 @@ nft_escrow = "F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "localnet"
+# cluster = "localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

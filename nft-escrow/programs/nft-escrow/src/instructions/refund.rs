@@ -1,0 +1,89 @@
+use crate::error::*;
+use crate::state::*;
+use anchor_lang::prelude::*;
+
+use anchor_spl::token;
+use anchor_spl::{
+    associated_token::AssociatedToken,
+    metadata::{Metadata, MetadataAccount, ID as MetadataID},
+    token_interface::{
+        close_account, transfer_checked, CloseAccount, Mint, TokenAccount, TokenInterface,
+        TransferChecked,
+    },
+};
+#[derive(Accounts)]
+pub struct Refund<'info> {
+    #[account(mut)]
+    pub maker: Signer<'info>,
+    #[account(mint::token_program=token_program)]
+    pub nft_mint: InterfaceAccount<'info, Mint>,
+    #[account(
+        mut,
+        associated_token::mint=nft_mint,
+        associated_token::authority=maker,
+        associated_token::token_program=token_program,
+    )]
+    pub maker_nft_ata: InterfaceAccount<'info, TokenAccount>,
+    #[account(
+        mut,
+        close=maker,
+        seeds = [b"escrow",maker.key().as_ref(), maker_nft_ata.key().as_ref()],
+        bump
+    )]
+    pub escrow: Account<'info, Escrow>,
+    #[account(
+        mut,
+        associated_token::mint = nft_mint,
+        associated_token::authority=escrow,
+        associated_token::token_program=token_program,
+    )]
+    pub vault: InterfaceAccount<'info, TokenAccount>,
+    #[account(
+        seeds=[b"metadata",MetadataID.as_ref(),nft_mint.key().as_ref()],
+        seeds::program=MetadataID,
+        bump,
+    )]
+    pub metadata: Account<'info, MetadataAccount>,
+    pub metadata_program: Program<'info, Metadata>,
+    pub token_program: Interface<'info, TokenInterface>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+
+impl<'info> Refund<'info> {
+    pub fn refund(&mut self, nft_mint: Pubkey) -> Result<()> {
+        require!(self.nft_mint.supply == 1, NFTEscrowErrors::NFTSupplyError);
+        require!(
+            self.nft_mint.decimals == 0,
+            NFTEscrowErrors::NFTDecimalsError
+        );
+        //transfer nft from vault ATA to maker ATA
+        let cpi_program = self.token_program.to_account_info();
+        let cpi_accounts = TransferChecked {
+            from: self.vault.to_account_info(),
+            mint: self.nft_mint.to_account_info(),
+            to: self.maker_nft_ata.to_account_info(),
+            authority: self.escrow.to_account_info(),
+        };
+        let seeds = &[
+            b"escrow",
+            self.maker.to_account_info().key.as_ref(),
+            self.maker_nft_ata.to_account_info().key.as_ref(),
+            &[self.escrow.escrow_bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
+        let cpi_context = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        transfer_checked(cpi_context, 1, self.nft_mint.decimals)?;
+        // Close the Vault Account
+        let close_program = self.token_program.to_account_info();
+        let close_accounts = CloseAccount {
+            account: self.vault.to_account_info(),
+            destination: self.maker.to_account_info(),
+            authority: self.escrow.to_account_info(),
+        };
+        let close_context =
+            CpiContext::new_with_signer(close_program, close_accounts, signer_seeds);
+        close_account(close_context)?;
+        Ok(())
+    }
+}

@@ -1,11 +1,11 @@
+use crate::error::*;
 use crate::state::*;
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    metadata::{Metadata, MetadataAccount},
-    token_interface::{Mint, TokenAccount, TokenInterface},
+    metadata::{Metadata, MetadataAccount, ID as MetadataID},
+    token_interface::{transfer_checked, Mint, TokenAccount, TokenInterface, TransferChecked},
 };
-
 #[derive(Accounts)]
 pub struct Make<'info> {
     #[account(mut)]
@@ -28,7 +28,7 @@ pub struct Make<'info> {
     )]
     pub escrow: Account<'info, Escrow>,
     #[account(
-        init,
+        init_if_needed,
         payer=maker,
         associated_token::mint = nft_mint,
         associated_token::authority=escrow,
@@ -36,8 +36,8 @@ pub struct Make<'info> {
     )]
     pub vault: InterfaceAccount<'info, TokenAccount>,
     #[account(
-        seeds=[b"metadata",metadata_program.key().as_ref(),nft_mint.key().as_ref()],
-        seeds::program=metadata_program,
+        seeds=[b"metadata",MetadataID.as_ref(),nft_mint.key().as_ref()],
+        seeds::program=MetadataID,
         bump,
     )]
     pub metadata: Account<'info, MetadataAccount>,
@@ -48,11 +48,27 @@ pub struct Make<'info> {
 }
 
 impl<'info> Make<'info> {
-    pub fn make(&mut self) -> Result<()> {
+    pub fn make(&mut self, nft_mint: Pubkey, received: u64, bumps: &MakeBumps) -> Result<()> {
+        require!(self.nft_mint.supply == 1, NFTEscrowErrors::NFTSupplyError);
+        require!(
+            self.nft_mint.decimals == 0,
+            NFTEscrowErrors::NFTDecimalsError
+        );
         //Initialize Escrow
-
+        self.escrow.maker = self.maker.key();
+        self.escrow.nft_mint = nft_mint;
+        self.escrow.received = received;
+        self.escrow.escrow_bump = bumps.escrow;
         //transfer nft from maker ATA to vault ATA
-
+        let cpi_program = self.token_program.to_account_info();
+        let cpi_accounts = TransferChecked {
+            from: self.maker_nft_ata.to_account_info(),
+            mint: self.nft_mint.to_account_info(),
+            to: self.vault.to_account_info(),
+            authority: self.maker.to_account_info(),
+        };
+        let cpi_context = CpiContext::new(cpi_program, cpi_accounts);
+        transfer_checked(cpi_context, 1, self.nft_mint.decimals)?;
         Ok(())
     }
 }

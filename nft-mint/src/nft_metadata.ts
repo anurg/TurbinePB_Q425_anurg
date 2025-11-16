@@ -20,7 +20,7 @@ umi.use(signerIdentity(signer));
     // Follow this JSON structure
     // https://docs.metaplex.com/programs/token-metadata/changelog/v1.0#json-structure
     const image =
-      "https://gateway.irys.xyz/ARehTXsn1mKDiY4uyXSCiKG4ntAk2JKu3pHWbS87z36B";
+      "https://gateway.irys.xyz/EvCZSSJKRPtB3qrWBtbRbMNGpRa7EvaaZ4pXDxNTRssQ";
     const metadata = {
       name: "Witch_01",
       description: "Witch on Solana",
@@ -29,11 +29,11 @@ umi.use(signerIdentity(signer));
       attributes: [
         {
           trait_type: "hat",
-          value: "sailor",
+          value: "sailor-blue",
         },
         {
           trait_type: "action",
-          value: "Smoking cigar",
+          value: "laughing",
         },
       ],
       properties: {
@@ -74,5 +74,6 @@ umi.use(signerIdentity(signer));
   }
 })();
 
-// Your image URI:  https://gateway.irys.xyz/ARehTXsn1mKDiY4uyXSCiKG4ntAk2JKu3pHWbS87z36B
 // Your metadata URI:  https://gateway.irys.xyz/BzgZh5n7Q9a6RKEWABnPWXCgCmRgcMNzkCG7JU7ztR3e
+
+//Your metadata URI:  https://gateway.irys.xyz/EPyhj4KUga3SSjTSMFN46RrEEpkQofuC7SpW8DhjNEVC
