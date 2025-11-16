@@ -15,7 +15,7 @@ declare_id!("F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk");
 pub mod nft_escrow {
     use super::*;
 
-    pub fn initialize(ctx: Context<Initialize>) -> Result<()> {
-        initialize::handler(ctx)
+    pub fn initialize(ctx: Context<Make>) -> Result<()> {
+        ctx.accounts.make()
     }
 }
