@@ -18,7 +18,7 @@ const links: { label: string; path: string }[] = [
   { label: 'Home', path: '/' },
   { label: 'My NFTs', path: '/my-nfts' },
   { label: 'Marketplace', path: '/marketplace' },
-  { label: 'My Escrows', path: '/my-escrows' },
+  { label: 'My Listings', path: '/my-listings' },
   { label: 'Account', path: '/account' },
 ]
 

@@ -13,8 +13,9 @@ use anchor_spl::{
 };
 #[derive(Accounts)]
 pub struct Take<'info> {
+    /// CHECK: The maker doesn't need to sign - they're just receiving payment
     #[account(mut)]
-    pub maker: Signer<'info>,
+    pub maker: AccountInfo<'info>,
     #[account(mut)]
     pub taker: Signer<'info>,
     #[account(mint::token_program=token_program)]

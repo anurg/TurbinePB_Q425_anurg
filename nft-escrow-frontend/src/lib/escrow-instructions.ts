@@ -44,15 +44,16 @@ export interface TakeEscrowParams {
 }
 
 /**
- * Build the instruction to accept an escrow (take)
+ * Build the instruction to accept an escrow (take/buy)
+ * The buyer (taker) pays SOL to the seller (maker) and receives the NFT
  */
 export async function buildTakeInstruction(params: TakeEscrowParams) {
   const { maker, takerSigner, nftMint } = params
 
   // Use the ASYNC version which auto-derives PDAs
   const instruction = await getTakeInstructionAsync({
-    maker: takerSigner, // Note: maker needs to be a signer for the take instruction
-    taker: takerSigner,
+    maker: toSolanaAddress(maker), // Seller's address (receives payment)
+    taker: takerSigner, // Buyer's signer (pays and receives NFT)
     nftMint: toSolanaAddress(nftMint),
   })
 

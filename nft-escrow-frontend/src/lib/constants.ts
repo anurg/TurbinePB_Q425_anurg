@@ -1,7 +1,7 @@
 import { PublicKey } from '@solana/web3.js'
 
 // Your deployed program ID
-export const PROGRAM_ID = new PublicKey('F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk')
+export const PROGRAM_ID = new PublicKey('GtgieiJUb3cCJ1xm7s1Vc6JU8PKe6GiGmTiA13KYcnK7')
 
 // Metaplex Token Metadata Program
 export const METADATA_PROGRAM_ID = new PublicKey('metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s')

@@ -26,7 +26,18 @@ interface CreateEscrowModalProps {
 
 export function CreateEscrowModal({ nft, open, onClose, onSuccess }: CreateEscrowModalProps) {
   const [price, setPrice] = useState('')
+  const [error, setError] = useState('')
   const { createEscrow, loading } = useEscrowTransactions()
+
+  const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setPrice(value)
+    setError('')
+
+    if (value && parseFloat(value) > 1000000) {
+      setError('Price cannot exceed 1,000,000 SOL')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -36,7 +47,13 @@ export function CreateEscrowModal({ nft, open, onClose, onSuccess }: CreateEscro
     try {
       const priceInSol = parseFloat(price)
       if (isNaN(priceInSol) || priceInSol <= 0) {
-        throw new Error('Invalid price')
+        setError('Please enter a valid price greater than 0')
+        return
+      }
+
+      if (priceInSol > 1000000) {
+        setError('Price cannot exceed 1,000,000 SOL')
+        return
       }
 
       const priceInLamports = solToLamports(priceInSol)
@@ -45,10 +62,12 @@ export function CreateEscrowModal({ nft, open, onClose, onSuccess }: CreateEscro
 
       // Success
       setPrice('')
+      setError('')
       onClose()
       onSuccess?.()
     } catch (err) {
       console.error('Failed to create escrow:', err)
+      setError('Failed to create listing. Please try again.')
     }
   }
 
@@ -86,20 +105,26 @@ export function CreateEscrowModal({ nft, open, onClose, onSuccess }: CreateEscro
                 type="number"
                 step="0.01"
                 min="0.01"
+                max="1000000"
                 placeholder="0.00"
                 value={price}
-                onChange={(e) => setPrice(e.target.value)}
+                onChange={handlePriceChange}
                 disabled={loading}
                 required
+                className={error ? 'border-red-500' : ''}
               />
-              <p className="text-xs text-gray-500">Buyers will pay this amount to purchase your NFT</p>
+              {error ? (
+                <p className="text-xs text-red-500">{error}</p>
+              ) : (
+                <p className="text-xs text-gray-500">Buyers will pay this amount to purchase your NFT</p>
+              )}
             </div>
 
             <DialogFooter className="gap-2">
               <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={loading || !price}>
+              <Button type="submit" disabled={loading || !price || !!error}>
                 {loading ? 'Creating...' : 'List NFT'}
               </Button>
             </DialogFooter>

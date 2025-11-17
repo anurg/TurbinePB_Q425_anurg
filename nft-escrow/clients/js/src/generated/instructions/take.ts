@@ -75,8 +75,7 @@ export type TakeInstruction<
   InstructionWithAccounts<
     [
       TAccountMaker extends string
-        ? WritableSignerAccount<TAccountMaker> &
-            AccountSignerMeta<TAccountMaker>
+        ? WritableAccount<TAccountMaker>
         : TAccountMaker,
       TAccountTaker extends string
         ? WritableSignerAccount<TAccountTaker> &
@@ -157,7 +156,7 @@ export type TakeAsyncInput<
   TAccountAssociatedTokenProgram extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
-  maker: TransactionSigner<TAccountMaker>;
+  maker: Address<TAccountMaker>;
   taker: TransactionSigner<TAccountTaker>;
   nftMint: Address<TAccountNftMint>;
   makerNftAta?: Address<TAccountMakerNftAta>;
@@ -376,7 +375,7 @@ export type TakeInput<
   TAccountAssociatedTokenProgram extends string = string,
   TAccountSystemProgram extends string = string,
 > = {
-  maker: TransactionSigner<TAccountMaker>;
+  maker: Address<TAccountMaker>;
   taker: TransactionSigner<TAccountTaker>;
   nftMint: Address<TAccountNftMint>;
   makerNftAta: Address<TAccountMakerNftAta>;
