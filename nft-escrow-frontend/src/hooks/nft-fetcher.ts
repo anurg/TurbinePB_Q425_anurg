@@ -171,3 +171,5 @@ function parseMetadataAccount(data: Buffer): {
     return null
   }
 }
+
+export { fetchNFTMetadata }

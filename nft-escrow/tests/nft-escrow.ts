@@ -15,7 +15,6 @@ describe("nft-escrow", () => {
   //// uncomment these for doing NFT escrow transfer- from payer to taker
   const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
   const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
-  console.log(`keypair private key-${taker.secretKey}`);
 
   //// uncomment these to reverse the NFT escrow transfer- from taker to payer
   // const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
