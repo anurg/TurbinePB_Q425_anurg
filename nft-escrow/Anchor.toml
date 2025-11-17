@@ -6,13 +6,12 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-nft_escrow = "F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk"
+nft_escrow = "GtgieiJUb3cCJ1xm7s1Vc6JU8PKe6GiGmTiA13KYcnK7"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-# cluster = "localnet"
 cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
