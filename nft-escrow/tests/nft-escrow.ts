@@ -7,18 +7,18 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   createAssociatedTokenAccountInstruction,
 } from "@solana/spl-token";
-import walletFile from "/home/nkb/.config/solana/id.json"; // ← Same wallet!
+import walletFile from "../../../.config/solana/id.json"; // ← Same wallet!
 import keypairTaker from "../keypair1.json"; // ← Same wallet!
 
 describe("nft-escrow", () => {
   // Use the SAME wallet that minted the NFT earlier-
   //// uncomment these for doing NFT escrow transfer- from payer to taker
-  const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
-  const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
+  // const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
+  // const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
 
   //// uncomment these to reverse the NFT escrow transfer- from taker to payer
-  // const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
-  // const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
+  const taker = anchor.web3.Keypair.fromSecretKey(new Uint8Array(walletFile));
+  const payer = anchor.web3.Keypair.fromSecretKey(new Uint8Array(keypairTaker));
 
   const connection = new anchor.web3.Connection(
     "https://api.devnet.solana.com",

@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-nft_escrow = "FBQUoGPLPPheTc1N1RbV6abP9k86X6XbsWqWMje4qcvV"
+nft_escrow = "GtgieiJUb3cCJ1xm7s1Vc6JU8PKe6GiGmTiA13KYcnK7"
 
 [registry]
 url = "https://api.apr.dev"
