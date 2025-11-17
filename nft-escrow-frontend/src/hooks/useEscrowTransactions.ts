@@ -53,12 +53,17 @@ export function useEscrowTransactions() {
       const signatureBytes = await signAndSendTransactionMessageWithSigners(transaction)
       const signature = getBase58Decoder().decode(signatureBytes)
 
-      toast.success(`Escrow created! Listed for ${lamportsToSol(priceInLamports).toFixed(2)} SOL`, {
-        id: 'create-escrow',
-      })
+      console.log('✅ Escrow created successfully!');
+      console.log('📝 Transaction signature:', signature);
+      console.log('🔗 View on explorer:', `https://explorer.solana.com/tx/${signature}?cluster=devnet`);
 
-      setLoading(false)
-      return signature
+      toast.success(
+        `Escrow created! Listed for ${lamportsToSol(priceInLamports).toFixed(2)} SOL - Check console for explorer link`,
+        { id: 'create-escrow', duration: 10000 }
+      );
+
+      setLoading(false);
+      return signature;
     } catch (err: any) {
       console.error('Create escrow error:', err)
       const errorMessage = formatError(err)
