@@ -9,7 +9,7 @@ pub use constants::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("F1Cgv2dQW7voUu2nwCvbr17TVgPquwgZx7iARdPq85jk");
+declare_id!("FBQUoGPLPPheTc1N1RbV6abP9k86X6XbsWqWMje4qcvV");
 
 #[program]
 pub mod nft_escrow {
