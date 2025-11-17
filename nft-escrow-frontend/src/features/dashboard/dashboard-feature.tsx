@@ -2,7 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ArrowRight, BookOpen, CookingPot, Droplets, LucideWallet, MessageCircleQuestion } from 'lucide-react'
 import React from 'react'
 import { AppHero } from '@/components/app-hero'
-
+import { TestConnection } from '@/components/TestConnection'
 const primary: {
   label: string
   href: string
@@ -94,6 +94,10 @@ export default function DashboardFeature() {
               </ul>
             </CardContent>
           </Card>
+          <main className="min-h-screen p-8">
+            <h1 className="text-4xl font-bold mb-8">NFT Escrow Marketplace</h1>
+            <TestConnection />
+          </main>
         </div>
       </div>
     </div>
