@@ -1,0 +1,75 @@
+'use client'
+
+import { useState } from 'react'
+import { PublicKey } from '@solana/web3.js'
+import { createTransaction, signAndSendTransactionMessageWithSigners, getBase58Decoder } from 'gill'
+import { useWalletUiSigner } from '@wallet-ui/react'
+import { useSolana } from '@/components/solana/use-solana'
+import { buildMakeInstruction } from '@/lib/escrow-instructions'
+import { formatError, lamportsToSol } from '@/lib/utils'
+import { toast } from 'sonner'
+
+export function useEscrowTransactions() {
+  const { client, account } = useSolana()
+  const signer = useWalletUiSigner({ account: account! })
+  const [loading, setLoading] = useState(false)
+
+  /**
+   * Create an escrow listing
+   */
+  const createEscrow = async (nftMint: string, priceInLamports: bigint) => {
+    if (!account || !signer) {
+      throw new Error('Wallet not connected')
+    }
+
+    setLoading(true)
+
+    try {
+      const maker = new PublicKey(account.address)
+      const mint = new PublicKey(nftMint)
+
+      // Build the make instruction using Codama generated function (ASYNC)
+      const makeInstruction = await buildMakeInstruction({
+        maker,
+        makerSigner: signer,
+        nftMint: mint,
+        price: priceInLamports,
+      })
+
+      // Get latest blockhash
+      const { value: latestBlockhash } = await client.rpc.getLatestBlockhash({ commitment: 'confirmed' }).send()
+
+      // Create transaction using Gill
+      const transaction = createTransaction({
+        feePayer: signer,
+        version: 0,
+        latestBlockhash,
+        instructions: [makeInstruction],
+      })
+
+      // Sign and send
+      toast.loading('Creating escrow...', { id: 'create-escrow' })
+
+      const signatureBytes = await signAndSendTransactionMessageWithSigners(transaction)
+      const signature = getBase58Decoder().decode(signatureBytes)
+
+      toast.success(`Escrow created! Listed for ${lamportsToSol(priceInLamports).toFixed(2)} SOL`, {
+        id: 'create-escrow',
+      })
+
+      setLoading(false)
+      return signature
+    } catch (err: any) {
+      console.error('Create escrow error:', err)
+      const errorMessage = formatError(err)
+      toast.error(`Failed to create escrow: ${errorMessage}`, { id: 'create-escrow' })
+      setLoading(false)
+      throw err
+    }
+  }
+
+  return {
+    createEscrow,
+    loading,
+  }
+}
